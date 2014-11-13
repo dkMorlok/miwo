@@ -11,7 +11,7 @@
 		"dist/miwo.min.js"
 	],
 	"ignore": [
-		"**/.*",
+		".*",
 		"node_modules",
 		"bower_components",
 		"less",
