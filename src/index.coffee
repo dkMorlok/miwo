@@ -6,7 +6,7 @@ miwo = require './bootstrap/Miwo'
 global.miwo = miwo
 
 # register default di extension
-miwo.registerExtension('miwo', require './MiwoExtension')
+miwo.registerExtension 'miwo', require './MiwoExtension'
 
 # create namespace
 Miwo = {}

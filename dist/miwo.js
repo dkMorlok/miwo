@@ -1181,11 +1181,11 @@ Miwo = (function() {
   };
 
   Miwo.prototype.createConfigurator = function() {
-    var configurator, extension, name, _i, _len, _ref;
+    var configurator, extension, name, _ref;
     configurator = new Configurator(this);
     _ref = this.extensions;
-    for (extension = _i = 0, _len = _ref.length; _i < _len; extension = ++_i) {
-      name = _ref[extension];
+    for (name in _ref) {
+      extension = _ref[name];
       configurator.setExtension(name, new extension());
     }
     return configurator;

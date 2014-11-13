@@ -121,7 +121,7 @@ class Miwo
 	# @returns {Miwo.bootstrap.Configurator}
 	createConfigurator: () ->
 		configurator = new Configurator(this)
-		for name,extension in @extensions
+		for name,extension of @extensions
 			configurator.setExtension(name, new extension())
 		return configurator
 
