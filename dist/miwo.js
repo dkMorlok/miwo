@@ -1070,7 +1070,6 @@ Configurator = (function() {
   function Configurator(miwo) {
     this.miwo = miwo;
     this.injectorFactory = new InjectorFactory();
-    this.injectorFactory.setExtension('miwo', new MiwoExtension());
   }
 
   Configurator.prototype.createInjector = function() {
@@ -1138,12 +1137,15 @@ Miwo = (function() {
 
   Miwo.prototype.injector = null;
 
+  Miwo.prototype.extensions = null;
+
   function Miwo() {
     this.ready((function(_this) {
       return function() {
         return _this.body = document.getElementsByTagName('body')[0];
       };
     })(this));
+    this.extensions = {};
   }
 
   Miwo.prototype.ready = function(callback) {
@@ -1174,8 +1176,19 @@ Miwo = (function() {
     return this.proxyMgr.get(name);
   };
 
+  Miwo.prototype.registerExtension = function(name, extension) {
+    this.extensions[name] = extension;
+  };
+
   Miwo.prototype.createConfigurator = function() {
-    return new Configurator(this);
+    var configurator, extension, name, _i, _len, _ref;
+    configurator = new Configurator(this);
+    _ref = this.extensions;
+    for (extension = _i = 0, _len = _ref.length; _i < _len; extension = ++_i) {
+      name = _ref[extension];
+      configurator.setExtension(name, new extension());
+    }
+    return configurator;
   };
 
   Miwo.prototype.setInjector = function(injector) {
@@ -1187,6 +1200,16 @@ Miwo = (function() {
       service = _ref[name];
       Miwo.service(name, service);
     }
+  };
+
+  Miwo.prototype.init = function(onInit) {
+    var configurator, injector;
+    configurator = this.createConfigurator();
+    if (onInit) {
+      onInit(configurator);
+    }
+    injector = configurator.createInjector();
+    return injector;
   };
 
   return Miwo;
@@ -6580,23 +6603,21 @@ module.exports = {
 
 },{}],52:[function(require,module,exports){
 (function (global){
-var Miwo;
+var Miwo, miwo;
 
 require('./core/Types');
 
 require('./core/Element');
 
-Miwo = {
-  version: "0.1.0"
-};
+miwo = require('./bootstrap/Miwo');
 
-if (global.module) {
-  module.exports = Miwo;
-}
+global.miwo = miwo;
+
+miwo.registerExtension('miwo', require('./MiwoExtension'));
+
+Miwo = {};
 
 global.Miwo = Miwo;
-
-global.miwo = require('./bootstrap/Miwo');
 
 Miwo.core = require('./core');
 
@@ -6634,7 +6655,7 @@ Miwo.utils = require('./utils');
 
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./app":11,"./bootstrap/Miwo":13,"./component":19,"./core":24,"./core/Element":20,"./core/Types":23,"./data":39,"./di":45,"./http":50,"./utils":71}],53:[function(require,module,exports){
+},{"./MiwoExtension":2,"./app":11,"./bootstrap/Miwo":13,"./component":19,"./core":24,"./core/Element":20,"./core/Types":23,"./data":39,"./di":45,"./http":50,"./utils":71}],53:[function(require,module,exports){
 var ComponentMacroSet, MacroSet,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
