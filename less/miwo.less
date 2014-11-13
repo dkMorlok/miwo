@@ -1,0 +1,96 @@
+@import "mixins.less";
+
+@defaultTransitionDuration: 0.5s;
+@overlayAnimate: true;
+@overlayDuration: 0.3s;
+
+
+body, html {
+	margin: 0;
+	padding: 0;
+}
+
+
+/* viewport */
+.miwo-ct {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+.miwo-viewport {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+.miwo-viewport.rendered {
+	> .miwo-ct {
+		> .miwo-layout-item {
+			.transition(all @defaultTransitionDuration);
+		}
+	}
+}
+
+
+/* layouts */
+.miwo-layout-absolute {
+	> .miwo-layout-item {
+		position: absolute;
+		overflow: hidden;
+		> .miwo-ct {
+			overflow: auto;
+		}
+	}
+}
+
+
+/* windows */
+.miwo-window {
+	position: relative;
+	margin-top: 0px;
+	&-tools {
+		float: right;
+		opacity: 0.5;
+		i {
+			float: left;
+			cursor: pointer;
+			margin-left: 10px;
+		}
+	}
+}
+
+
+/* buttons */
+div:focus, .btn:focus, .btn:active:focus, .btn.active:focus {
+	outline: 0 !important;
+}
+.btn:focus {
+	color: #333;
+	background-color: #fff;
+	border-color: #ccc;
+}
+.btn.active:focus {
+	color: #333;
+	background-color: #e6e6e6;
+	border-color: #adadad;
+}
+
+
+/* utils */
+.miwo-overlayed {
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+.miwo-overlay {
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	opacity: 0;
+	display: "none";
+	& when (@overlayAnimate = true) {
+		.transition(all @overlayDuration);
+	}
+}
