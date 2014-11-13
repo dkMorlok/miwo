@@ -1,11 +1,16 @@
 require './core/Types'
 require './core/Element'
 
+# create loader
+miwo = require './bootstrap/Miwo'
+global.miwo = miwo
+
+# register default di extension
+miwo.registerExtension('miwo', require './MiwoExtension')
+
 # create namespace
-Miwo = {version: "0.1.0"}
-if global.module then module.exports = Miwo
+Miwo = {}
 global.Miwo = Miwo
-global.miwo = require './bootstrap/Miwo'
 
 # core
 Miwo.core = require './core'

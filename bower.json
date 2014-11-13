@@ -4,6 +4,9 @@
 	"version": "0.0.1",
 	"keywords": ["framework", "mvc", "coffeescript"],
 	"homepage": "http://www.miwojs.com",
+	"authors": [
+		"Dusan Kmet <morlokdk@gmail.com>"
+	],
 	"main": [
 		"dist/miwo.css",
 		"dist/miwo.js",

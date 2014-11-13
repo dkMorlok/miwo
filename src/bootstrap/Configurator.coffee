@@ -10,7 +10,6 @@ class Configurator
 
 	constructor: (@miwo) ->
 		@injectorFactory = new InjectorFactory()
-		@injectorFactory.setExtension('miwo', new MiwoExtension())
 
 
 	createInjector: () ->

@@ -51,9 +51,13 @@ class Miwo
 	# @property {Miwo.di.Injector}
 	injector: null
 
+	# @property Object
+	extensions: null
 
-	constructor: () ->
+
+	constructor: ->
 		@ready () => @body = document.getElementsByTagName('body')[0];
+		@extensions = {}
 
 
 	# Register ready callback
@@ -105,10 +109,21 @@ class Miwo
 		return @proxyMgr.get(name)
 
 
+	# Register DI extension class
+	# @param {String} name Unique name of extension
+	# @param {Miwo.di.InjectorExtension} extension Extension class
+	registerExtension: (name, extension) ->
+		@extensions[name] = extension
+		return
+
+
 	# Creates default configurator
 	# @returns {Miwo.bootstrap.Configurator}
 	createConfigurator: () ->
-		return new Configurator(this)
+		configurator = new Configurator(this)
+		for name,extension in @extensions
+			configurator.setExtension(name, new extension())
+		return configurator
 
 
 	# Set injector (called by Configurator)
@@ -119,6 +134,12 @@ class Miwo
 			Miwo.service(name, service) # create service getter
 		return
 
+
+	init: (onInit)->
+		configurator = @createConfigurator()
+		onInit(configurator) if onInit
+		injector = configurator.createInjector()
+		return injector
 
 
 # global object
