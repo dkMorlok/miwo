@@ -11,7 +11,8 @@
 		"dist/miwo.min.js"
 	],
 	"ignore": [
-		".*",
+		"gulpfile.js",
+		"package.json",
 		"node_modules",
 		"bower_components",
 		"less",
