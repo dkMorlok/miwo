@@ -41,4 +41,7 @@ Miwo.Proxy = Miwo.data.Proxy
 Miwo.http = require './http'
 
 # utils
+Miwo.locale = require './locale'
+
+# utils
 Miwo.utils = require './utils'

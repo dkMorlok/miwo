@@ -17,15 +17,8 @@ class TemplateLoader
 
 
 	loadFromPath: (path) ->
-		url = @baseUrl+@templatesDir+'/'+path+'.'+@templatesExt
-		source = ''
-		request = new Request
-			url: url+"?t="+(new Date().getTime())
-			async: false
-			onSuccess: (data) -> source = data
-			onFailure: () -> throw new Error("Load template failure from url #{url}")
-		request.send()
-		return source
+		url = @baseUrl + @templatesDir + '/' + path+'.' + @templatesExt + '?t=' + (new Date().getTime())
+		return miwo.http.read(url)
 
 
 module.exports = TemplateLoader

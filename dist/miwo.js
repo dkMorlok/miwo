@@ -302,7 +302,7 @@ function isUndefined(arg) {
 }
 
 },{}],2:[function(require,module,exports){
-var Application, ComponentManager, ComponentSelector, ControllerFactory, CookieManager, EntityManager, FlashNotificator, InjectorExtension, LatteCompiler, LatteFactory, MiwoExtension, ProxyManager, RequestFactory, RequestManager, Router, StoreManager, TemplateFactory, TemplateLoader, ZIndexManager,
+var Application, ComponentManager, ComponentSelector, ControllerFactory, CookieManager, EntityManager, FlashNotificator, InjectorExtension, LatteCompiler, LatteFactory, MiwoExtension, ProxyManager, RequestFactory, RequestManager, Router, StoreManager, TemplateFactory, TemplateLoader, Translator, ZIndexManager,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -341,6 +341,8 @@ StoreManager = require('./data/StoreManager');
 ProxyManager = require('./data/ProxyManager');
 
 EntityManager = require('./data/EntityManager');
+
+Translator = require('./locale/Translator');
 
 MiwoExtension = (function(_super) {
   __extends(MiwoExtension, _super);
@@ -435,6 +437,9 @@ MiwoExtension = (function(_super) {
     })(this));
     injector.define('miwo.router', Router);
     injector.define('miwo.requestFactory', RequestFactory);
+    injector.define('translator', Translator, (function(_this) {
+      return function(service) {};
+    })(this));
     injector.define('templateFactory', TemplateFactory, (function(_this) {
       return function(service) {};
     })(this));
@@ -531,7 +536,7 @@ MiwoExtension = (function(_super) {
 module.exports = MiwoExtension;
 
 
-},{"./app/Application":3,"./app/ControllerFactory":5,"./app/FlashNotificator":7,"./app/RequestFactory":9,"./app/Router":10,"./component/ComponentManager":15,"./component/ComponentSelector":16,"./component/ZIndexManager":18,"./data/EntityManager":27,"./data/ProxyManager":31,"./data/StoreManager":36,"./di/InjectorExtension":42,"./http/CookieManager":46,"./http/RequestManager":49,"./http/plugins":51,"./latte/ComponentMacroSet":53,"./latte/CoreMacroSet":54,"./latte/LatteCompiler":56,"./latte/LatteFactory":57,"./templates/TemplateFactory":66,"./templates/TemplateLoader":67}],3:[function(require,module,exports){
+},{"./app/Application":3,"./app/ControllerFactory":5,"./app/FlashNotificator":7,"./app/RequestFactory":9,"./app/Router":10,"./component/ComponentManager":15,"./component/ComponentSelector":16,"./component/ZIndexManager":18,"./data/EntityManager":27,"./data/ProxyManager":31,"./data/StoreManager":36,"./di/InjectorExtension":42,"./http/CookieManager":46,"./http/RequestManager":49,"./http/plugins":51,"./latte/ComponentMacroSet":53,"./latte/CoreMacroSet":54,"./latte/LatteCompiler":56,"./latte/LatteFactory":57,"./locale/Translator":65,"./templates/TemplateFactory":68,"./templates/TemplateLoader":69}],3:[function(require,module,exports){
 var Application, EventManager, MiwoObject,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -1135,6 +1140,8 @@ Miwo = (function() {
 
   Miwo.prototype.application = Miwo.service('application');
 
+  Miwo.prototype.translator = Miwo.service('translator');
+
   Miwo.prototype.injector = null;
 
   Miwo.prototype.extensions = null;
@@ -1150,6 +1157,10 @@ Miwo = (function() {
 
   Miwo.prototype.ready = function(callback) {
     window.on('domready', callback);
+  };
+
+  Miwo.prototype.tr = function(key) {
+    return this.translator.get(key);
   };
 
   Miwo.prototype.get = function(id) {
@@ -2323,7 +2334,7 @@ Container = (function(_super) {
 module.exports = Container;
 
 
-},{"../layout":64,"../utils/Collection":68,"./Component":14}],18:[function(require,module,exports){
+},{"../layout":64,"../utils/Collection":70,"./Component":14}],18:[function(require,module,exports){
 var MiwoObject, Overlay, ZIndexManager,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -2519,7 +2530,7 @@ ZIndexManager = (function(_super) {
 module.exports = ZIndexManager;
 
 
-},{"../core/Object":22,"../utils/Overlay":70}],19:[function(require,module,exports){
+},{"../core/Object":22,"../utils/Overlay":72}],19:[function(require,module,exports){
 module.exports = {
   Component: require('./Component'),
   Container: require('./Container')
@@ -6506,6 +6517,23 @@ RequestManager = (function(_super) {
     return request;
   };
 
+  RequestManager.prototype.read = function(url) {
+    var data, request;
+    data = null;
+    request = new Request({
+      url: url,
+      async: false,
+      onSuccess: function(response) {
+        return data = response;
+      },
+      onFailure: function() {
+        throw new Error("Can't load data from url " + url);
+      }
+    });
+    request.send();
+    return data;
+  };
+
   RequestManager.prototype.manage = function(request) {
     if (request.manager) {
       return;
@@ -6651,11 +6679,13 @@ Miwo.Proxy = Miwo.data.Proxy;
 
 Miwo.http = require('./http');
 
+Miwo.locale = require('./locale');
+
 Miwo.utils = require('./utils');
 
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./MiwoExtension":2,"./app":11,"./bootstrap/Miwo":13,"./component":19,"./core":24,"./core/Element":20,"./core/Types":23,"./data":39,"./di":45,"./http":50,"./utils":71}],53:[function(require,module,exports){
+},{"./MiwoExtension":2,"./app":11,"./bootstrap/Miwo":13,"./component":19,"./core":24,"./core/Element":20,"./core/Types":23,"./data":39,"./di":45,"./http":50,"./locale":66,"./utils":73}],53:[function(require,module,exports){
 var ComponentMacroSet, MacroSet,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -7372,6 +7402,55 @@ module.exports = {
 
 
 },{"./Absolute":59,"./Auto":60,"./Fit":61,"./Form":62,"./Layout":63}],65:[function(require,module,exports){
+var Translator;
+
+Translator = (function() {
+  Translator.prototype.translates = null;
+
+  function Translator() {
+    this.translates = {};
+    return;
+  }
+
+  Translator.prototype.setTranslates = function(name, translates) {
+    if (!this.translates[name]) {
+      this.translates[name] = translates;
+    } else {
+      Object.merge(this.translates[name], translates);
+    }
+  };
+
+  Translator.prototype.get = function(key) {
+    var group, part, _i, _len, _ref;
+    group = this.translates;
+    _ref = key.split('.');
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      part = _ref[_i];
+      group = group[part];
+      if (group === void 0) {
+        return null;
+      }
+      if (!group) {
+        break;
+      }
+    }
+    return group;
+  };
+
+  return Translator;
+
+})();
+
+module.exports = Translator;
+
+
+},{}],66:[function(require,module,exports){
+module.exports = {
+  Translator: require('./Translator')
+};
+
+
+},{"./Translator":65}],67:[function(require,module,exports){
 var Template;
 
 Template = (function() {
@@ -7454,7 +7533,7 @@ Template = (function() {
 module.exports = Template;
 
 
-},{}],66:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 var Template, TemplateFactory;
 
 Template = require('./Template');
@@ -7482,7 +7561,7 @@ TemplateFactory = (function() {
 module.exports = TemplateFactory;
 
 
-},{"./Template":65}],67:[function(require,module,exports){
+},{"./Template":67}],69:[function(require,module,exports){
 var TemplateLoader;
 
 TemplateLoader = (function() {
@@ -7507,21 +7586,9 @@ TemplateLoader = (function() {
   };
 
   TemplateLoader.prototype.loadFromPath = function(path) {
-    var request, source, url;
-    url = this.baseUrl + this.templatesDir + '/' + path + '.' + this.templatesExt;
-    source = '';
-    request = new Request({
-      url: url + "?t=" + (new Date().getTime()),
-      async: false,
-      onSuccess: function(data) {
-        return source = data;
-      },
-      onFailure: function() {
-        throw new Error("Load template failure from url " + url);
-      }
-    });
-    request.send();
-    return source;
+    var url;
+    url = this.baseUrl + this.templatesDir + '/' + path + '.' + this.templatesExt + '?t=' + (new Date().getTime());
+    return miwo.http.read(url);
   };
 
   return TemplateLoader;
@@ -7531,7 +7598,7 @@ TemplateLoader = (function() {
 module.exports = TemplateLoader;
 
 
-},{}],68:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 var Collection;
 
 Collection = (function() {
@@ -7705,7 +7772,7 @@ Collection = (function() {
 module.exports = Collection;
 
 
-},{}],69:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 var KeyListener;
 
 KeyListener = (function() {
@@ -7766,7 +7833,7 @@ KeyListener = (function() {
 module.exports = KeyListener;
 
 
-},{}],70:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 var MiwoObject, Overlay,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -7846,7 +7913,7 @@ Overlay = (function(_super) {
 module.exports = Overlay;
 
 
-},{"../core/Object":22}],71:[function(require,module,exports){
+},{"../core/Object":22}],73:[function(require,module,exports){
 module.exports = {
   Overlay: require('./Overlay'),
   Collection: require('./Collection'),
@@ -7854,4 +7921,4 @@ module.exports = {
 };
 
 
-},{"./Collection":68,"./KeyListener":69,"./Overlay":70}]},{},[52])
+},{"./Collection":70,"./KeyListener":71,"./Overlay":72}]},{},[52])

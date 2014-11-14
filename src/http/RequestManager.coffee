@@ -30,6 +30,17 @@ class RequestManager extends MiwoObject
 		return request
 
 
+	read: (url) ->
+		data = null
+		request = new Request
+			url: url
+			async: false
+			onSuccess: (response) -> data = response
+			onFailure: () -> throw new Error("Can't load data from url #{url}")
+		request.send()
+		return data
+
+
 	manage: (request) ->
 		if request.manager
 			return

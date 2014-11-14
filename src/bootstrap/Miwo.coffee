@@ -48,6 +48,9 @@ class Miwo
 	# @property {Miwo.app.Application}
 	application: @service 'application'
 
+	# @property {Miwo.locale.Translator}
+	translator: @service 'translator'
+
 	# @property {Miwo.di.Injector}
 	injector: null
 
@@ -65,6 +68,11 @@ class Miwo
 	ready: (callback) ->
 		window.on('domready', callback)
 		return
+
+	# Translate key by translator
+	# @param {String} key
+	tr: (key) ->
+		return @translator.get(key)
 
 
 	# Get component by id

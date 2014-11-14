@@ -22,6 +22,8 @@ ZIndexManager = require './component/ZIndexManager'
 StoreManager = require './data/StoreManager'
 ProxyManager = require './data/ProxyManager'
 EntityManager = require './data/EntityManager'
+# locale
+Translator = require './locale/Translator'
 
 
 class MiwoExtension extends InjectorExtension
@@ -95,6 +97,11 @@ class MiwoExtension extends InjectorExtension
 			return
 		injector.define 'miwo.router', Router
 		injector.define 'miwo.requestFactory', RequestFactory
+
+
+		# setup locale
+		injector.define 'translator', Translator, (service)=>
+			return
 
 
 		# setup templating

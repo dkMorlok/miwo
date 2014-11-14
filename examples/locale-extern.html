@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Locale - External</title>
+	<script src="mootools/mootools-core.js"></script>
+	<script src="../dist/miwo.js"></script>
+</head>
+<body>
+<script>
+	// must by hosted on some http url address
+	miwo.ready(function() {
+		miwo.init();
+
+		// default translates
+		miwo.translator.setTranslates('app', JSON.decode(miwo.http.read('locale/en.json')));
+		// translates by language (cs)
+		miwo.translator.setTranslates('app', JSON.decode(miwo.http.read('locale/cs.json')));
+
+		console.log(miwo.translator.get('app.title'));
+		console.log(miwo.translator.get('app.desc'));
+		console.log(miwo.translator.get('app.empty'));
+		console.log(miwo.translator.get('app.undefined'));
+
+		console.log(miwo.tr('app.title'));
+		console.log(miwo.tr('app.desc'));
+		console.log(miwo.tr('app.empty'));
+		console.log(miwo.tr('app.undefined'));
+	});
+</script>
+</body>
+</html>

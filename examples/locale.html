@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Locale</title>
+	<script src="mootools/mootools-core.js"></script>
+	<script src="../dist/miwo.js"></script>
+</head>
+<body>
+<script>
+	miwo.ready(function() {
+		miwo.init();
+
+		// default translates
+		miwo.translator.setTranslates('app', {
+			title: "Application Title",
+			desc: "My demo application",
+			empty: ""
+		});
+
+		// translates by language (cs)
+		miwo.translator.setTranslates('app', {
+			desc: "Moja demo aplikace"
+		});
+
+		console.log(miwo.translator.get('app.title'));
+		console.log(miwo.translator.get('app.desc'));
+		console.log(miwo.translator.get('app.empty'));
+		console.log(miwo.translator.get('app.undefined'));
+
+		console.log(miwo.tr('app.title'));
+		console.log(miwo.tr('app.desc'));
+		console.log(miwo.tr('app.empty'));
+		console.log(miwo.tr('app.undefined'));
+		console.log(miwo.tr('undefined.title'));
+	});
+</script>
+</body>
+</html>
