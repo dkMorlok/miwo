@@ -2596,11 +2596,71 @@ Element.Properties.on = {
 };
 
 Element.implement({
-  getIndex: function(query) {
-    return this.getAllPrevious(query).length;
+  isDisplayed: function() {
+    return this.getStyle('display') !== 'none';
+  },
+  isVisible: function() {
+    var h, w;
+    w = this.offsetWidth;
+    h = this.offsetHeight;
+    if (w === 0 && h === 0) {
+      return false;
+    } else if (w > 0 && h > 0) {
+      return true;
+    } else {
+      return this.style.display !== 'none';
+    }
+  },
+  toggle: function() {
+    return this[this.isDisplayed() ? 'hide' : 'show']();
+  },
+  hide: function() {
+    var d, e;
+    try {
+      d = this.getStyle('display');
+    } catch (_error) {
+      e = _error;
+    }
+    if (d === 'none') {
+      return this;
+    }
+    return this.store('element:_originalDisplay', d || '').setStyle('display', 'none');
+  },
+  show: function(display) {
+    if (!display && this.isDisplayed()) {
+      return this;
+    }
+    display = display || this.retrieve('element:_originalDisplay') || 'block';
+    return this.setStyle('display', display === 'none' ? 'block' : display);
   },
   setVisible: function(visible) {
     this[(visible ? "show" : "hide")]();
+  },
+  toggleClass: function(cls, toggled) {
+    if (toggled === true || toggled === false) {
+      if (toggled === true) {
+        if (!this.hasClass(cls)) {
+          this.addClass(cls);
+        }
+      } else {
+        if (this.hasClass(cls)) {
+          this.removeClass(cls);
+        }
+      }
+    } else {
+      if (this.hasClass(cls)) {
+        this.removeClass(cls);
+      } else {
+        this.addClass(cls);
+      }
+    }
+    return this;
+  },
+  swapClass: function(remove, add) {
+    return this.removeClass(remove).addClass(add);
+  },
+  getIndex: function(query) {
+    return this.getAllPrevious(query).length;
   },
   setFocus: function(tabIndex) {
     this.setAttribute("tabIndex", tabIndex || 0);
@@ -2608,9 +2668,13 @@ Element.implement({
   },
   setClass: function(cls, enabled) {
     if (enabled) {
-      this.addClass(cls);
+      if (!this.hasClass(cls)) {
+        this.addClass(cls);
+      }
     } else {
-      this.removeClass(cls);
+      if (this.hasClass(cls)) {
+        this.removeClass(cls);
+      }
     }
   }
 });

@@ -45,23 +45,76 @@ Element.Properties.on =
 
 Element.implement({
 
-	getIndex: (query) ->
-		return this.getAllPrevious(query).length
+	isDisplayed: ->
+		return @getStyle('display') isnt 'none'
+
+
+	isVisible: ->
+		w = @offsetWidth
+		h = @offsetHeight
+		if w is 0 && h is 0
+			return false
+		else if w > 0 && h > 0
+			return true
+		else
+			return @style.display isnt 'none'
+
+
+	toggle: ->
+		return this[if @isDisplayed() then 'hide' else 'show']();
+
+
+	hide: ->
+		#IE fails here if the element is not in the dom
+		try d = @getStyle('display') catch e
+		if d is 'none' then return this
+		return @store('element:_originalDisplay', d || '').setStyle('display', 'none')
+
+
+	show: (display) ->
+		if !display && @isDisplayed() then return this
+		display = display || @retrieve('element:_originalDisplay') || 'block'
+		return @setStyle('display', if display is 'none' then  'block' else display)
+
 
 	setVisible: (visible) ->
 		this[(if visible then "show" else "hide")]()
 		return
+
+
+	toggleClass: (cls, toggled) ->
+		if toggled is true || toggled is false
+			if toggled is true
+				@addClass(cls) if !@hasClass(cls)
+			else
+				@removeClass(cls) if @hasClass(cls)
+		else
+			if @hasClass(cls)
+				@removeClass(cls)
+			else
+				@addClass(cls)
+		return this
+
+
+	swapClass: (remove, add) ->
+		return @removeClass(remove).addClass(add)
+
+
+	getIndex: (query) ->
+		return this.getAllPrevious(query).length
+
 
 	setFocus: (tabIndex) ->
 		@setAttribute( "tabIndex", tabIndex or 0)
 		@focus()
 		return
 
+
 	setClass: (cls, enabled) ->
 		if enabled
-			@addClass(cls)
+			@addClass(cls) if !@hasClass(cls)
 		else
-			@removeClass(cls)
+			@removeClass(cls) if @hasClass(cls)
 		return
 })
 
