@@ -1,17 +1,17 @@
 {
 	"name": "miwo",
 	"description": "MVC framework in CoffeeScript with Dependency Injection",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"keywords": ["framework", "mvc", "coffeescript"],
 	"homepage": "http://www.miwojs.com",
 	"authors": [
 		"Dusan Kmet <morlokdk@gmail.com>"
 	],
 	"main": [
-		"dist/miwo.css",
-		"dist/miwo.js",
-		"dist/miwo.min.css",
-		"dist/miwo.min.js"
+		"dist/css/miwo.css",
+		"dist/css/miwo.min.css",
+		"dist/js/miwo.js",
+		"dist/js/miwo.min.js"
 	],
 	"ignore": [
 		"gulpfile.js",

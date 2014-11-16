@@ -13,12 +13,12 @@ var paths = {
 	css: {
 		src: 'less/miwo.less',
 		target: 'miwo.css',
-		buildDir: './dist/'
+		buildDir: './dist/css/'
 	},
 	js: {
 		src: 'src/index.coffee',
 		target: 'miwo.js',
-		buildDir: './dist/'
+		buildDir: './dist/js/'
 	},
 	watch: {
 		coffee: ['src/**/*.coffee'],

@@ -1,6 +1,6 @@
 {
 	"name": "miwo",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"description": "MVC framework in CoffeeScript with Dependency Injection",
 	"devDependencies": {
 		"gulp": "~3.8.10",
