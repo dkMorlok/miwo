@@ -1,15 +1,16 @@
 Controller = require './Controller'
+MiwoObject = require '../core/Object'
 
 
-class ControllerFactory
+class ControllerFactory extends MiwoObject
 
-	@inject: ['injector']
-	injector: null
+	injector: @inject('injector')
 	namespace: 'App'
 	controllers: null
 
 
-	constructor: () ->
+	constructor: (config) ->
+		super(config)
 		@controllers = {}
 
 

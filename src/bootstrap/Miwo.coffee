@@ -75,6 +75,17 @@ class Miwo
 		return @translator.get(key)
 
 
+	# Require file by ajax and evaluate it
+	# @param {String} file
+	require: (file) ->
+		data = miwo.http.read(file+"?t="+(new Date().getTime()))
+		try
+			eval(data)
+		catch e
+			throw new Error("Cant require file #{file}, data are not evaluable. Reason #{e.getMessage()}")
+		return
+
+
 	# Get component by id
 	# @param {String}
 	# @return {Miwo.component.Component}

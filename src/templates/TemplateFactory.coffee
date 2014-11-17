@@ -1,10 +1,11 @@
-Template = require ('./Template')
+MiwoObject = require '../core/Object'
+Template = require './Template'
 
-class TemplateFactory
 
-	@inject: ['latteFactory', 'templateLoader']
-	latteFactory: null
-	templateLoader: null
+class TemplateFactory extends MiwoObject
+
+	latteFactory: @inject('latteFactory')
+	templateLoader: @inject('templateLoader')
 
 
 	createTemplate: () ->

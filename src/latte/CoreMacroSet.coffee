@@ -86,9 +86,9 @@ class CoreMacroSet extends MacroSet
 		out = ""
 		return out  unless matches
 		if matches[1].charAt(0) is "\""
-			out = "string:Locale.get(" + matches[1] + ")"
+			out = "string:miwo.tr(" + matches[1] + ")"
 		else
-			out = "string:Locale.get(\"" + matches[1] + "\")"
+			out = "string:miwo.tr(\"" + matches[1] + "\")"
 		out += ".substitute({" + matches[3].replace("\\", "").replace("\\", "") + "})"  if matches[3]
 		return out
 

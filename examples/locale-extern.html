@@ -11,10 +11,9 @@
 	miwo.ready(function() {
 		miwo.init();
 
-		// default translates
-		miwo.translator.setTranslates('app', JSON.decode(miwo.http.read('locale/en.json')));
-		// translates by language (cs)
-		miwo.translator.setTranslates('app', JSON.decode(miwo.http.read('locale/cs.json')));
+		miwo.translator.setTranslates('en', 'app', JSON.decode(miwo.http.read('locale/en.json')));
+		miwo.translator.setTranslates('cs', 'app', JSON.decode(miwo.http.read('locale/cs.json')));
+		miwo.translator.use('cs');
 
 		console.log(miwo.translator.get('app.title'));
 		console.log(miwo.translator.get('app.desc'));

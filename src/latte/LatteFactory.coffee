@@ -1,9 +1,10 @@
+MiwoObject = require '../core/Object'
 Latte = require './Latte'
 
-class LatteFactory
 
-	@inject: ['latteCompiler']
-	latteCompiler: null
+class LatteFactory extends MiwoObject
+
+	latteCompiler: @inject('latteCompiler')
 
 
 	createLatte: () ->

@@ -11,16 +11,19 @@
 		miwo.init();
 
 		// default translates
-		miwo.translator.setTranslates('app', {
+		miwo.translator.setTranslates('en', 'app', {
 			title: "Application Title",
 			desc: "My demo application",
 			empty: ""
 		});
 
 		// translates by language (cs)
-		miwo.translator.setTranslates('app', {
+		miwo.translator.setTranslates('cs', 'app', {
 			desc: "Moja demo aplikace"
 		});
+
+		miwo.translator.use('cs');
+
 
 		console.log(miwo.translator.get('app.title'));
 		console.log(miwo.translator.get('app.desc'));

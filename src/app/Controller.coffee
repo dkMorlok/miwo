@@ -1,4 +1,7 @@
-class Controller
+MiwoObject = require '../core/Object'
+
+
+class Controller extends MiwoObject
 
 	injector: null
 	application: null

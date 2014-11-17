@@ -680,11 +680,19 @@ module.exports = Application;
 
 
 },{"../core/Object":23,"./EventManager":6}],4:[function(require,module,exports){
-var Controller,
+var Controller, MiwoObject,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   __slice = [].slice;
 
-Controller = (function() {
-  function Controller() {}
+MiwoObject = require('../core/Object');
+
+Controller = (function(_super) {
+  __extends(Controller, _super);
+
+  function Controller() {
+    return Controller.__super__.constructor.apply(this, arguments);
+  }
 
   Controller.prototype.injector = null;
 
@@ -767,26 +775,31 @@ Controller = (function() {
 
   return Controller;
 
-})();
+})(MiwoObject);
 
 module.exports = Controller;
 
 
-},{}],5:[function(require,module,exports){
-var Controller, ControllerFactory;
+},{"../core/Object":23}],5:[function(require,module,exports){
+var Controller, ControllerFactory, MiwoObject,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 Controller = require('./Controller');
 
-ControllerFactory = (function() {
-  ControllerFactory.inject = ['injector'];
+MiwoObject = require('../core/Object');
 
-  ControllerFactory.prototype.injector = null;
+ControllerFactory = (function(_super) {
+  __extends(ControllerFactory, _super);
+
+  ControllerFactory.prototype.injector = ControllerFactory.inject('injector');
 
   ControllerFactory.prototype.namespace = 'App';
 
   ControllerFactory.prototype.controllers = null;
 
-  function ControllerFactory() {
+  function ControllerFactory(config) {
+    ControllerFactory.__super__.constructor.call(this, config);
     this.controllers = {};
   }
 
@@ -825,12 +838,12 @@ ControllerFactory = (function() {
 
   return ControllerFactory;
 
-})();
+})(MiwoObject);
 
 module.exports = ControllerFactory;
 
 
-},{"./Controller":4}],6:[function(require,module,exports){
+},{"../core/Object":23,"./Controller":4}],6:[function(require,module,exports){
 var EventManager, MiwoObject,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -1159,6 +1172,17 @@ Miwo = (function() {
 
   Miwo.prototype.tr = function(key) {
     return this.translator.get(key);
+  };
+
+  Miwo.prototype.require = function(file) {
+    var data, e;
+    data = miwo.http.read(file + "?t=" + (new Date().getTime()));
+    try {
+      eval(data);
+    } catch (_error) {
+      e = _error;
+      throw new Error("Cant require file " + file + ", data are not evaluable. Reason " + (e.getMessage()));
+    }
   };
 
   Miwo.prototype.get = function(id) {
@@ -6896,9 +6920,9 @@ CoreMacroSet = (function(_super) {
       return out;
     }
     if (matches[1].charAt(0) === "\"") {
-      out = "string:Locale.get(" + matches[1] + ")";
+      out = "string:miwo.tr(" + matches[1] + ")";
     } else {
-      out = "string:Locale.get(\"" + matches[1] + "\")";
+      out = "string:miwo.tr(\"" + matches[1] + "\")";
     }
     if (matches[3]) {
       out += ".substitute({" + matches[3].replace("\\", "").replace("\\", "") + "})";
@@ -7121,16 +7145,22 @@ module.exports = LatteCompiler;
 
 
 },{}],58:[function(require,module,exports){
-var Latte, LatteFactory;
+var Latte, LatteFactory, MiwoObject,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+MiwoObject = require('../core/Object');
 
 Latte = require('./Latte');
 
-LatteFactory = (function() {
-  function LatteFactory() {}
+LatteFactory = (function(_super) {
+  __extends(LatteFactory, _super);
 
-  LatteFactory.inject = ['latteCompiler'];
+  function LatteFactory() {
+    return LatteFactory.__super__.constructor.apply(this, arguments);
+  }
 
-  LatteFactory.prototype.latteCompiler = null;
+  LatteFactory.prototype.latteCompiler = LatteFactory.inject('latteCompiler');
 
   LatteFactory.prototype.createLatte = function() {
     return new Latte(this.latteCompiler);
@@ -7138,12 +7168,12 @@ LatteFactory = (function() {
 
   return LatteFactory;
 
-})();
+})(MiwoObject);
 
 module.exports = LatteFactory;
 
 
-},{"./Latte":56}],59:[function(require,module,exports){
+},{"../core/Object":23,"./Latte":56}],59:[function(require,module,exports){
 var MacroSet;
 
 MacroSet = (function() {
@@ -7479,22 +7509,53 @@ var Translator;
 Translator = (function() {
   Translator.prototype.translates = null;
 
+  Translator.prototype.lang = null;
+
+  Translator.prototype.defaultLang = null;
+
   function Translator() {
     this.translates = {};
     return;
   }
 
-  Translator.prototype.setTranslates = function(name, translates) {
-    if (!this.translates[name]) {
-      this.translates[name] = translates;
+  Translator.prototype.setDefault = function(defaultLang) {
+    this.defaultLang = defaultLang;
+  };
+
+  Translator.prototype.setTranslates = function(lang, name, translates) {
+    if (!this.defaultLang) {
+      this.defaultLang = lang;
+      this.lang = lang;
+    }
+    if (!this.translates[lang]) {
+      this.translates[lang] = {};
+    }
+    if (!this.translates[lang][name]) {
+      this.translates[lang][name] = translates;
     } else {
-      Object.merge(this.translates[name], translates);
+      Object.merge(this.translates[lang][name], translates);
     }
   };
 
+  Translator.prototype.use = function(lang) {
+    this.lang = lang;
+  };
+
   Translator.prototype.get = function(key) {
+    var translated;
+    translated = this.getByLang(key, this.lang);
+    if (translated === null) {
+      translated = this.getByLang(key, this.defaultLang);
+    }
+    return translated;
+  };
+
+  Translator.prototype.getByLang = function(key, lang) {
     var group, part, _i, _len, _ref;
-    group = this.translates;
+    group = this.translates[lang];
+    if (!group) {
+      return null;
+    }
     _ref = key.split('.');
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       part = _ref[_i];
@@ -7606,18 +7667,24 @@ module.exports = Template;
 
 
 },{}],69:[function(require,module,exports){
-var Template, TemplateFactory;
+var MiwoObject, Template, TemplateFactory,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+MiwoObject = require('../core/Object');
 
 Template = require('./Template');
 
-TemplateFactory = (function() {
-  function TemplateFactory() {}
+TemplateFactory = (function(_super) {
+  __extends(TemplateFactory, _super);
 
-  TemplateFactory.inject = ['latteFactory', 'templateLoader'];
+  function TemplateFactory() {
+    return TemplateFactory.__super__.constructor.apply(this, arguments);
+  }
 
-  TemplateFactory.prototype.latteFactory = null;
+  TemplateFactory.prototype.latteFactory = TemplateFactory.inject('latteFactory');
 
-  TemplateFactory.prototype.templateLoader = null;
+  TemplateFactory.prototype.templateLoader = TemplateFactory.inject('templateLoader');
 
   TemplateFactory.prototype.createTemplate = function() {
     var template;
@@ -7628,12 +7695,12 @@ TemplateFactory = (function() {
 
   return TemplateFactory;
 
-})();
+})(MiwoObject);
 
 module.exports = TemplateFactory;
 
 
-},{"./Template":68}],70:[function(require,module,exports){
+},{"../core/Object":23,"./Template":68}],70:[function(require,module,exports){
 var TemplateLoader;
 
 TemplateLoader = (function() {
