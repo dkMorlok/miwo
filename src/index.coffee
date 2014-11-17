@@ -1,3 +1,4 @@
+require './core/Common'
 require './core/Types'
 require './core/Element'
 

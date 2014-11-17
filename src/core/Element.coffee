@@ -141,16 +141,3 @@ Object.append(document, EventShortcuts)
 Request.implement(EventShortcuts)
 Events.implement(EventShortcuts)
 Element.implement(EventShortcuts)
-
-
-Function::getter = (prop, getter) ->
-	Object.defineProperty @prototype, prop, {get:getter, configurable: yes}
-	return
-
-Function::setter = (prop, setter) ->
-	Object.defineProperty @prototype, prop, {set: setter, configurable: yes}
-	return
-
-Function::property = (prop, def) ->
-	Object.defineProperty @prototype, prop, def
-	return

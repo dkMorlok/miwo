@@ -69,6 +69,11 @@ class Injector
 		for name,value of options
 			options[name] = DiHelper.evaluateArgs(value, this)[0]
 
+		# property/setter injection
+		if klass.prototype.injects
+			for propName,serviceName of klass.prototype.injects
+				options[propName] = @get(serviceName)
+
 		# create instance
 		if factory
 			if Type.isString(factory)
@@ -81,15 +86,6 @@ class Injector
 		# validate instance
 		if instance !instanceof klass
 			throw new Error("Created service is not instance of desired type #{klass.name}, but instance of #{instance.constructor.name}")
-
-		# property/setter injection
-		if klass.inject
-			for name in klass.inject
-				setter = 'set'+name.capitalize()
-				if instance[setter]
-					instance[setter](@get(name))
-				else
-					instance[name] = @get(instance[name] || name)
 
 		# return instance
 		return instance

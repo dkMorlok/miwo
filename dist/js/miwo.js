@@ -536,7 +536,7 @@ MiwoExtension = (function(_super) {
 module.exports = MiwoExtension;
 
 
-},{"./app/Application":3,"./app/ControllerFactory":5,"./app/FlashNotificator":7,"./app/RequestFactory":9,"./app/Router":10,"./component/ComponentManager":15,"./component/ComponentSelector":16,"./component/ZIndexManager":18,"./data/EntityManager":27,"./data/ProxyManager":31,"./data/StoreManager":36,"./di/InjectorExtension":42,"./http/CookieManager":46,"./http/RequestManager":49,"./http/plugins":51,"./latte/ComponentMacroSet":53,"./latte/CoreMacroSet":54,"./latte/LatteCompiler":56,"./latte/LatteFactory":57,"./locale/Translator":65,"./templates/TemplateFactory":68,"./templates/TemplateLoader":69}],3:[function(require,module,exports){
+},{"./app/Application":3,"./app/ControllerFactory":5,"./app/FlashNotificator":7,"./app/RequestFactory":9,"./app/Router":10,"./component/ComponentManager":15,"./component/ComponentSelector":16,"./component/ZIndexManager":18,"./data/EntityManager":28,"./data/ProxyManager":32,"./data/StoreManager":37,"./di/InjectorExtension":43,"./http/CookieManager":47,"./http/RequestManager":50,"./http/plugins":52,"./latte/ComponentMacroSet":54,"./latte/CoreMacroSet":55,"./latte/LatteCompiler":57,"./latte/LatteFactory":58,"./locale/Translator":66,"./templates/TemplateFactory":69,"./templates/TemplateLoader":70}],3:[function(require,module,exports){
 var Application, EventManager, MiwoObject,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -548,15 +548,13 @@ EventManager = require('./EventManager');
 Application = (function(_super) {
   __extends(Application, _super);
 
-  Application.inject = ['injector', 'miwo.controllerFactory'];
+  Application.prototype.injector = Application.inject('injector');
 
-  Application.prototype.injector = null;
+  Application.prototype.controllerFactory = Application.inject('controllerFactory', 'miwo.controllerFactory');
 
   Application.prototype.eventMgr = null;
 
   Application.prototype.componentMgr = null;
-
-  Application.prototype.controllerFactory = null;
 
   Application.prototype.viewport = null;
 
@@ -681,7 +679,7 @@ Application = (function(_super) {
 module.exports = Application;
 
 
-},{"../core/Object":22,"./EventManager":6}],4:[function(require,module,exports){
+},{"../core/Object":23,"./EventManager":6}],4:[function(require,module,exports){
 var Controller,
   __slice = [].slice;
 
@@ -901,7 +899,7 @@ EventManager = (function(_super) {
 module.exports = EventManager;
 
 
-},{"../core/Object":22}],7:[function(require,module,exports){
+},{"../core/Object":23}],7:[function(require,module,exports){
 var FlashNotificator;
 
 FlashNotificator = (function() {
@@ -1048,7 +1046,7 @@ Router = (function(_super) {
 module.exports = Router;
 
 
-},{"../core/Object":22,"./Request":8}],11:[function(require,module,exports){
+},{"../core/Object":23,"./Request":8}],11:[function(require,module,exports){
 module.exports = {
   Application: require('./Application'),
   Controller: require('./Controller'),
@@ -1099,7 +1097,7 @@ Configurator = (function() {
 module.exports = Configurator;
 
 
-},{"../MiwoExtension":2,"../di/InjectorFactory":43}],13:[function(require,module,exports){
+},{"../MiwoExtension":2,"../di/InjectorFactory":44}],13:[function(require,module,exports){
 var Configurator, Miwo;
 
 Configurator = require('./Configurator');
@@ -1842,7 +1840,7 @@ Component = (function(_super) {
 module.exports = Component;
 
 
-},{"../core/Object":22}],15:[function(require,module,exports){
+},{"../core/Object":23}],15:[function(require,module,exports){
 var ComponentManager, MiwoObject,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -1914,7 +1912,7 @@ ComponentManager = (function(_super) {
 module.exports = ComponentManager;
 
 
-},{"../core/Object":22}],16:[function(require,module,exports){
+},{"../core/Object":23}],16:[function(require,module,exports){
 var ComponentSelector;
 
 ComponentSelector = (function() {
@@ -2334,7 +2332,7 @@ Container = (function(_super) {
 module.exports = Container;
 
 
-},{"../layout":64,"../utils/Collection":70,"./Component":14}],18:[function(require,module,exports){
+},{"../layout":65,"../utils/Collection":71,"./Component":14}],18:[function(require,module,exports){
 var MiwoObject, Overlay, ZIndexManager,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -2530,7 +2528,7 @@ ZIndexManager = (function(_super) {
 module.exports = ZIndexManager;
 
 
-},{"../core/Object":22,"../utils/Overlay":72}],19:[function(require,module,exports){
+},{"../core/Object":23,"../utils/Overlay":73}],19:[function(require,module,exports){
 module.exports = {
   Component: require('./Component'),
   Container: require('./Container')
@@ -2538,6 +2536,37 @@ module.exports = {
 
 
 },{"./Component":14,"./Container":17}],20:[function(require,module,exports){
+Function.prototype.getter = function(prop, getter) {
+  Object.defineProperty(this.prototype, prop, {
+    get: getter,
+    configurable: true
+  });
+  return null;
+};
+
+Function.prototype.setter = function(prop, setter) {
+  Object.defineProperty(this.prototype, prop, {
+    set: setter,
+    configurable: true
+  });
+  return null;
+};
+
+Function.prototype.property = function(prop, def) {
+  Object.defineProperty(this.prototype, prop, def);
+  return null;
+};
+
+Function.prototype.inject = function(name, service) {
+  if (!this.prototype.injects) {
+    this.prototype.injects = {};
+  }
+  this.prototype.injects[name] = service || name;
+  return null;
+};
+
+
+},{}],21:[function(require,module,exports){
 var EventShortcuts;
 
 Element.Properties.cls = {
@@ -2709,26 +2738,8 @@ Events.implement(EventShortcuts);
 
 Element.implement(EventShortcuts);
 
-Function.prototype.getter = function(prop, getter) {
-  Object.defineProperty(this.prototype, prop, {
-    get: getter,
-    configurable: true
-  });
-};
 
-Function.prototype.setter = function(prop, setter) {
-  Object.defineProperty(this.prototype, prop, {
-    set: setter,
-    configurable: true
-  });
-};
-
-Function.prototype.property = function(prop, def) {
-  Object.defineProperty(this.prototype, prop, def);
-};
-
-
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 var Events, NativeEvents,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -2952,7 +2963,7 @@ Events = (function(_super) {
 module.exports = Events;
 
 
-},{"events":1}],22:[function(require,module,exports){
+},{"events":1}],23:[function(require,module,exports){
 var Events, MiwoObject,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -3034,7 +3045,7 @@ MiwoObject.addMethod = function(name, method) {
 module.exports = MiwoObject;
 
 
-},{"./Events":21}],23:[function(require,module,exports){
+},{"./Events":22}],24:[function(require,module,exports){
 var __slice = [].slice;
 
 Type.extend({
@@ -3262,14 +3273,14 @@ source: http://github.com/eneko/Array.sortBy
 })();
 
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 module.exports = {
   Events: require('./Events'),
   Object: require('./Object')
 };
 
 
-},{"./Events":21,"./Object":22}],25:[function(require,module,exports){
+},{"./Events":22,"./Object":23}],26:[function(require,module,exports){
 var BaseManager;
 
 BaseManager = (function() {
@@ -3329,7 +3340,7 @@ BaseManager = (function() {
 module.exports = BaseManager;
 
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 var Entity, EntityManager, Record, Store,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -3428,7 +3439,7 @@ Entity = (function(_super) {
 module.exports = Entity;
 
 
-},{"./EntityManager":27,"./Record":32,"./Store":34}],27:[function(require,module,exports){
+},{"./EntityManager":28,"./Record":33,"./Store":35}],28:[function(require,module,exports){
 var BaseManager, Entity, EntityManager,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -3500,7 +3511,7 @@ EntityManager = (function(_super) {
 module.exports = EntityManager;
 
 
-},{"./BaseManager":25,"./Entity":26}],28:[function(require,module,exports){
+},{"./BaseManager":26,"./Entity":27}],29:[function(require,module,exports){
 var Filter;
 
 Filter = (function() {
@@ -3567,7 +3578,7 @@ Filter = (function() {
 module.exports = Filter;
 
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 var MiwoObject, Operation, Record,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -3900,7 +3911,7 @@ Operation = (function(_super) {
 module.exports = Operation;
 
 
-},{"../core/Object":22,"./Record":32}],30:[function(require,module,exports){
+},{"../core/Object":23,"./Record":33}],31:[function(require,module,exports){
 var MiwoObject, Operation, Proxy,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -4148,7 +4159,7 @@ Proxy = (function(_super) {
 module.exports = Proxy;
 
 
-},{"../core/Object":22,"./Operation":29}],31:[function(require,module,exports){
+},{"../core/Object":23,"./Operation":30}],32:[function(require,module,exports){
 var BaseManager, Proxy, ProxyManager,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -4200,7 +4211,7 @@ ProxyManager = (function(_super) {
 module.exports = ProxyManager;
 
 
-},{"./BaseManager":25,"./Proxy":30}],32:[function(require,module,exports){
+},{"./BaseManager":26,"./Proxy":31}],33:[function(require,module,exports){
 var Events, Record, Types,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -4671,7 +4682,7 @@ Record = (function(_super) {
 module.exports = Record;
 
 
-},{"../core/Events":21,"./Types":38}],33:[function(require,module,exports){
+},{"../core/Events":22,"./Types":39}],34:[function(require,module,exports){
 var Sorter;
 
 Sorter = (function() {
@@ -4727,7 +4738,7 @@ Sorter = (function() {
 module.exports = Sorter;
 
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 var MiwoObject, Store, StoreFilters, StoreSorters,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -5513,7 +5524,7 @@ Store = (function(_super) {
 module.exports = Store;
 
 
-},{"../core/Object":22,"./StoreFilters":35,"./StoreSorters":37}],35:[function(require,module,exports){
+},{"../core/Object":23,"./StoreFilters":36,"./StoreSorters":38}],36:[function(require,module,exports){
 var Filter, StoreFilters;
 
 Filter = require('./Filter');
@@ -5619,7 +5630,7 @@ StoreFilters = (function() {
 module.exports = StoreFilters;
 
 
-},{"./Filter":28}],36:[function(require,module,exports){
+},{"./Filter":29}],37:[function(require,module,exports){
 var BaseManager, Store, StoreManager,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -5651,7 +5662,7 @@ StoreManager = (function(_super) {
 module.exports = StoreManager;
 
 
-},{"./BaseManager":25,"./Store":34}],37:[function(require,module,exports){
+},{"./BaseManager":26,"./Store":35}],38:[function(require,module,exports){
 var Sorter, StoreSorters;
 
 Sorter = require('./Sorter');
@@ -5765,7 +5776,7 @@ StoreSorters = (function() {
 module.exports = StoreSorters;
 
 
-},{"./Sorter":33}],38:[function(require,module,exports){
+},{"./Sorter":34}],39:[function(require,module,exports){
 var Types;
 
 Types = {
@@ -5845,7 +5856,7 @@ Types = {
 module.exports = Types;
 
 
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 module.exports = {
   Record: require('./Record'),
   Entity: require('./Entity'),
@@ -5857,7 +5868,7 @@ module.exports = {
 };
 
 
-},{"./Entity":26,"./Filter":28,"./Proxy":30,"./Record":32,"./Sorter":33,"./Store":34,"./Types":38}],40:[function(require,module,exports){
+},{"./Entity":27,"./Filter":29,"./Proxy":31,"./Record":33,"./Sorter":34,"./Store":35,"./Types":39}],41:[function(require,module,exports){
 var DiHelper;
 
 DiHelper = (function() {
@@ -5985,7 +5996,7 @@ DiHelper = (function() {
 module.exports = new DiHelper;
 
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 var DiHelper, Injector, Service;
 
 Service = require('./Service');
@@ -6068,7 +6079,7 @@ Injector = (function() {
   };
 
   Injector.prototype.createInstance = function(klass, options, factory) {
-    var instance, name, setter, value, _i, _len, _ref;
+    var instance, name, propName, serviceName, value, _ref;
     if (options == null) {
       options = {};
     }
@@ -6078,6 +6089,13 @@ Injector = (function() {
     for (name in options) {
       value = options[name];
       options[name] = DiHelper.evaluateArgs(value, this)[0];
+    }
+    if (klass.prototype.injects) {
+      _ref = klass.prototype.injects;
+      for (propName in _ref) {
+        serviceName = _ref[propName];
+        options[propName] = this.get(serviceName);
+      }
     }
     if (factory) {
       if (Type.isString(factory)) {
@@ -6092,18 +6110,6 @@ Injector = (function() {
     if (!(instance instanceof klass)) {
       throw new Error("Created service is not instance of desired type " + klass.name + ", but instance of " + instance.constructor.name);
     }
-    if (klass.inject) {
-      _ref = klass.inject;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        name = _ref[_i];
-        setter = 'set' + name.capitalize();
-        if (instance[setter]) {
-          instance[setter](this.get(name));
-        } else {
-          instance[name] = this.get(instance[name] || name);
-        }
-      }
-    }
     return instance;
   };
 
@@ -6114,7 +6120,7 @@ Injector = (function() {
 module.exports = Injector;
 
 
-},{"./DiHelper":40,"./Service":44}],42:[function(require,module,exports){
+},{"./DiHelper":41,"./Service":45}],43:[function(require,module,exports){
 var DiHelper, InjectorExtension;
 
 DiHelper = require('./DiHelper');
@@ -6141,7 +6147,7 @@ InjectorExtension = (function() {
 module.exports = InjectorExtension;
 
 
-},{"./DiHelper":40}],43:[function(require,module,exports){
+},{"./DiHelper":41}],44:[function(require,module,exports){
 var DiHelper, Injector, InjectorFactory;
 
 Injector = require('./Injector');
@@ -6236,7 +6242,7 @@ InjectorFactory = (function() {
 module.exports = InjectorFactory;
 
 
-},{"./DiHelper":40,"./Injector":41}],44:[function(require,module,exports){
+},{"./DiHelper":41,"./Injector":42}],45:[function(require,module,exports){
 var DiHelper, Service;
 
 DiHelper = require('./DiHelper');
@@ -6343,7 +6349,7 @@ Service = (function() {
 module.exports = Service;
 
 
-},{"./DiHelper":40}],45:[function(require,module,exports){
+},{"./DiHelper":41}],46:[function(require,module,exports){
 module.exports = {
   Injector: require('./Injector'),
   InjectorFactory: require('./InjectorFactory'),
@@ -6351,7 +6357,7 @@ module.exports = {
 };
 
 
-},{"./Injector":41,"./InjectorExtension":42,"./InjectorFactory":43}],46:[function(require,module,exports){
+},{"./Injector":42,"./InjectorExtension":43,"./InjectorFactory":44}],47:[function(require,module,exports){
 var CookieManager, CookieSection;
 
 CookieSection = require('./CookieSection');
@@ -6404,7 +6410,7 @@ CookieManager = (function() {
 module.exports = CookieManager;
 
 
-},{"./CookieSection":47}],47:[function(require,module,exports){
+},{"./CookieSection":48}],48:[function(require,module,exports){
 var CookieSection;
 
 CookieSection = (function() {
@@ -6467,7 +6473,7 @@ CookieSection = (function() {
 module.exports = CookieSection;
 
 
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 var HttpRequest,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -6540,7 +6546,7 @@ HttpRequest = (function(_super) {
 module.exports = HttpRequest;
 
 
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 var HttpRequest, MiwoObject, RequestManager,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -6635,14 +6641,14 @@ RequestManager = (function(_super) {
 module.exports = RequestManager;
 
 
-},{"../core/Object":22,"./HttpRequest":48}],50:[function(require,module,exports){
+},{"../core/Object":23,"./HttpRequest":49}],51:[function(require,module,exports){
 module.exports = {
   HttpRequest: require('./HttpRequest'),
   RequestManager: require('./RequestManager')
 };
 
 
-},{"./HttpRequest":48,"./RequestManager":49}],51:[function(require,module,exports){
+},{"./HttpRequest":49,"./RequestManager":50}],52:[function(require,module,exports){
 var ErrorPlugin, FailurePlugin, RedirectPlugin;
 
 RedirectPlugin = (function() {
@@ -6693,9 +6699,11 @@ module.exports = {
 };
 
 
-},{}],52:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 (function (global){
 var Miwo, miwo;
+
+require('./core/Common');
 
 require('./core/Types');
 
@@ -6749,7 +6757,7 @@ Miwo.utils = require('./utils');
 
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./MiwoExtension":2,"./app":11,"./bootstrap/Miwo":13,"./component":19,"./core":24,"./core/Element":20,"./core/Types":23,"./data":39,"./di":45,"./http":50,"./locale":66,"./utils":73}],53:[function(require,module,exports){
+},{"./MiwoExtension":2,"./app":11,"./bootstrap/Miwo":13,"./component":19,"./core":25,"./core/Common":20,"./core/Element":21,"./core/Types":24,"./data":40,"./di":46,"./http":51,"./locale":67,"./utils":74}],54:[function(require,module,exports){
 var ComponentMacroSet, MacroSet,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -6795,7 +6803,7 @@ ComponentMacroSet = (function(_super) {
 module.exports = ComponentMacroSet;
 
 
-},{"./MacroSet":58}],54:[function(require,module,exports){
+},{"./MacroSet":59}],55:[function(require,module,exports){
 var CoreMacroSet, MacroSet,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -6905,7 +6913,7 @@ CoreMacroSet = (function(_super) {
 module.exports = CoreMacroSet;
 
 
-},{"./MacroSet":58}],55:[function(require,module,exports){
+},{"./MacroSet":59}],56:[function(require,module,exports){
 var Latte;
 
 Latte = (function() {
@@ -6972,7 +6980,7 @@ Latte = (function() {
 module.exports = Latte;
 
 
-},{}],56:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 var LatteCompiler;
 
 LatteCompiler = (function() {
@@ -7112,7 +7120,7 @@ LatteCompiler = (function() {
 module.exports = LatteCompiler;
 
 
-},{}],57:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 var Latte, LatteFactory;
 
 Latte = require('./Latte');
@@ -7135,7 +7143,7 @@ LatteFactory = (function() {
 module.exports = LatteFactory;
 
 
-},{"./Latte":55}],58:[function(require,module,exports){
+},{"./Latte":56}],59:[function(require,module,exports){
 var MacroSet;
 
 MacroSet = (function() {
@@ -7173,7 +7181,7 @@ MacroSet = (function() {
 module.exports = MacroSet;
 
 
-},{}],59:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 var AbsoluteLayout, Layout,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -7217,7 +7225,7 @@ AbsoluteLayout = (function(_super) {
 module.exports = AbsoluteLayout;
 
 
-},{"./Layout":63}],60:[function(require,module,exports){
+},{"./Layout":64}],61:[function(require,module,exports){
 var AutoLayout, Layout,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -7241,7 +7249,7 @@ AutoLayout = (function(_super) {
 module.exports = AutoLayout;
 
 
-},{"./Layout":63}],61:[function(require,module,exports){
+},{"./Layout":64}],62:[function(require,module,exports){
 var FitLayout, Layout,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -7265,7 +7273,7 @@ FitLayout = (function(_super) {
 module.exports = FitLayout;
 
 
-},{"./Layout":63}],62:[function(require,module,exports){
+},{"./Layout":64}],63:[function(require,module,exports){
 var FormLayout, Layout,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -7289,7 +7297,7 @@ FormLayout = (function(_super) {
 module.exports = FormLayout;
 
 
-},{"./Layout":63}],63:[function(require,module,exports){
+},{"./Layout":64}],64:[function(require,module,exports){
 var Laoyut, MiwoObject,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -7452,7 +7460,7 @@ Laoyut = (function(_super) {
 module.exports = Laoyut;
 
 
-},{"../core/Object":22}],64:[function(require,module,exports){
+},{"../core/Object":23}],65:[function(require,module,exports){
 module.exports = {
   Absolute: require('./Absolute'),
   Form: require('./Form'),
@@ -7465,7 +7473,7 @@ module.exports = {
 };
 
 
-},{"./Absolute":59,"./Auto":60,"./Fit":61,"./Form":62,"./Layout":63}],65:[function(require,module,exports){
+},{"./Absolute":60,"./Auto":61,"./Fit":62,"./Form":63,"./Layout":64}],66:[function(require,module,exports){
 var Translator;
 
 Translator = (function() {
@@ -7508,13 +7516,13 @@ Translator = (function() {
 module.exports = Translator;
 
 
-},{}],66:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 module.exports = {
   Translator: require('./Translator')
 };
 
 
-},{"./Translator":65}],67:[function(require,module,exports){
+},{"./Translator":66}],68:[function(require,module,exports){
 var Template;
 
 Template = (function() {
@@ -7597,7 +7605,7 @@ Template = (function() {
 module.exports = Template;
 
 
-},{}],68:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 var Template, TemplateFactory;
 
 Template = require('./Template');
@@ -7625,7 +7633,7 @@ TemplateFactory = (function() {
 module.exports = TemplateFactory;
 
 
-},{"./Template":67}],69:[function(require,module,exports){
+},{"./Template":68}],70:[function(require,module,exports){
 var TemplateLoader;
 
 TemplateLoader = (function() {
@@ -7662,7 +7670,7 @@ TemplateLoader = (function() {
 module.exports = TemplateLoader;
 
 
-},{}],70:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 var Collection;
 
 Collection = (function() {
@@ -7836,7 +7844,7 @@ Collection = (function() {
 module.exports = Collection;
 
 
-},{}],71:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 var KeyListener;
 
 KeyListener = (function() {
@@ -7897,7 +7905,7 @@ KeyListener = (function() {
 module.exports = KeyListener;
 
 
-},{}],72:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 var MiwoObject, Overlay,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -7977,7 +7985,7 @@ Overlay = (function(_super) {
 module.exports = Overlay;
 
 
-},{"../core/Object":22}],73:[function(require,module,exports){
+},{"../core/Object":23}],74:[function(require,module,exports){
 module.exports = {
   Overlay: require('./Overlay'),
   Collection: require('./Collection'),
@@ -7985,4 +7993,4 @@ module.exports = {
 };
 
 
-},{"./Collection":70,"./KeyListener":71,"./Overlay":72}]},{},[52])
+},{"./Collection":71,"./KeyListener":72,"./Overlay":73}]},{},[53])

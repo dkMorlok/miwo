@@ -4,12 +4,10 @@ EventManager = require './EventManager'
 
 class Application extends MiwoObject
 
-	@inject: ['injector', 'miwo.controllerFactory']
-
-	injector: null
+	injector: @inject('injector')
+	controllerFactory: @inject('controllerFactory', 'miwo.controllerFactory')
 	eventMgr: null
 	componentMgr: null
-	controllerFactory: null
 	viewport: null
 	rendered: false
 	controllers: null

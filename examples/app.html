@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>App</title>
+	<script src="mootools/mootools-core.js"></script>
+	<script src="../dist/js/miwo.js"></script>
+</head>
+<body>
+<script>
+	miwo.ready(function() {
+		var injector = miwo.init();
+		injector.define('viewport', function() {});
+
+		var app = injector.get('application');
+		console.log(app);
+	});
+</script>
+</body>
+</html>
