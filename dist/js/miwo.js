@@ -7931,15 +7931,19 @@ KeyListener = (function() {
       this.event = event;
     }
     this.handlers = {};
-    this.handleEvent = (function(_this) {
-      return function(e) {
-        if (_this.handlers[e.key]) {
-          return _this.handlers[e.key](e);
-        }
-      };
-    })(this);
     this.resume();
+    return;
   }
+
+  KeyListener.prototype.handleEvent = function(e) {
+    var stopEvent;
+    if (this.handlers[e.key]) {
+      stopEvent = this.handlers[e.key](e);
+      if (stopEvent) {
+        e.stop();
+      }
+    }
+  };
 
   KeyListener.prototype.on = function(name, handler) {
     this.handlers[name] = handler;
