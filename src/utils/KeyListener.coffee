@@ -11,14 +11,12 @@ class KeyListener
 		@target = target
 		@event = event if event
 		@handlers = {}
+		@handleEvent = (e)=>
+			if @handlers[e.key]
+				stopEvent = @handlers[e.key](e)
+				if stopEvent then e.stop()
+			return
 		@resume()
-		return
-
-
-	handleEvent: (e) ->
-		if @handlers[e.key]
-			stopEvent = @handlers[e.key](e)
-			if stopEvent then e.stop()
 		return
 
 

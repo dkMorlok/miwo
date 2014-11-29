@@ -100,16 +100,15 @@ class Store extends MiwoObject
 		if @filter
 			@getFilters().set(@filter)
 
-		if @data
-			data = @data
-			@data = []
-			@setData(data)
-		else
-			@data = []
+		@data = []
+		@init()
 
 		if @autoLoad
 			@load()
 
+
+	init: ->
+		return
 
 	getAll: () ->
 		return @data

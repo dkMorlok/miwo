@@ -31,6 +31,7 @@ class ControllerFactory extends MiwoObject
 
 		controller = @injector.createInstance(klass)
 		controller.setInjector(@injector)
+		controller.name = name
 
 		if controller !instanceof Controller
 			throw new Error("Controller #{klassName} is not instance of Controller")

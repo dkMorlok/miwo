@@ -4,14 +4,16 @@ EventManager = require './EventManager'
 
 class Application extends MiwoObject
 
-	injector: @inject('injector')
-	controllerFactory: @inject('controllerFactory', 'miwo.controllerFactory')
+	@inject 'injector'
+	@inject 'controllerFactory', 'miwo.controllerFactory'
+
 	eventMgr: null
 	componentMgr: null
 	viewport: null
 	rendered: false
 	controllers: null
 	runControllers: null
+	autoCanonicalize: true
 
 
 	constructor: (config) ->
@@ -88,7 +90,7 @@ class Application extends MiwoObject
 
 
 	forward: (request) ->
-		setTimeout () => @execute(request)
+		setTimeout((() => @execute(request)), 1)
 		return
 
 
@@ -99,9 +101,6 @@ class Application extends MiwoObject
 
 	executeRequestByHash: ->
 		hash = document.location.hash.substr(1).toLowerCase()
-		if !hash
-			return
-
 		request = @getRouter().constructRequest(hash)
 		constructedHash = @getRouter().constructHash(request)
 

@@ -216,6 +216,12 @@ class Component extends MiwoObject
 		@focusEl
 
 
+	setEl: (el) ->
+		@el = el
+		@contentEl.inject(el) if @contentEl
+		return
+
+
 	setParentEl: (el, position) ->
 		@parentEl = (if position is "after" or position is "before" then el.getParent() else el)
 		@el.inject(el, position)

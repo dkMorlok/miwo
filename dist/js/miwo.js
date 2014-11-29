@@ -357,7 +357,10 @@ MiwoExtension = (function(_super) {
         namespace: 'App',
         flash: null,
         controllers: {},
-        run: []
+        run: [],
+        defaultController: 'default',
+        defaultAction: 'default',
+        autoCanonicalize: true
       },
       templates: {
         baseUrl: '<%baseUrl%>',
@@ -416,7 +419,8 @@ MiwoExtension = (function(_super) {
     }
     injector.define('application', Application, (function(_this) {
       return function(service) {
-        return service.runControllers = _this.config.app.run;
+        service.runControllers = _this.config.app.run;
+        return service.autoCanonicalize = _this.config.app.autoCanonicalize;
       };
     })(this));
     injector.define('flash', FlashNotificator, (function(_this) {
@@ -435,7 +439,12 @@ MiwoExtension = (function(_super) {
         }
       };
     })(this));
-    injector.define('miwo.router', Router);
+    injector.define('miwo.router', Router, (function(_this) {
+      return function(service) {
+        service.controller = _this.config.app.defaultController;
+        service.action = _this.config.app.defaultAction;
+      };
+    })(this));
     injector.define('miwo.requestFactory', RequestFactory);
     injector.define('translator', Translator, (function(_this) {
       return function(service) {};
@@ -548,9 +557,9 @@ EventManager = require('./EventManager');
 Application = (function(_super) {
   __extends(Application, _super);
 
-  Application.prototype.injector = Application.inject('injector');
+  Application.inject('injector');
 
-  Application.prototype.controllerFactory = Application.inject('controllerFactory', 'miwo.controllerFactory');
+  Application.inject('controllerFactory', 'miwo.controllerFactory');
 
   Application.prototype.eventMgr = null;
 
@@ -563,6 +572,8 @@ Application = (function(_super) {
   Application.prototype.controllers = null;
 
   Application.prototype.runControllers = null;
+
+  Application.prototype.autoCanonicalize = true;
 
   function Application(config) {
     this.controllers = {};
@@ -646,11 +657,11 @@ Application = (function(_super) {
   };
 
   Application.prototype.forward = function(request) {
-    setTimeout((function(_this) {
+    setTimeout(((function(_this) {
       return function() {
         return _this.execute(request);
       };
-    })(this));
+    })(this)), 1);
   };
 
   Application.prototype.redirect = function(request) {
@@ -660,9 +671,6 @@ Application = (function(_super) {
   Application.prototype.executeRequestByHash = function() {
     var constructedHash, hash, request;
     hash = document.location.hash.substr(1).toLowerCase();
-    if (!hash) {
-      return;
-    }
     request = this.getRouter().constructRequest(hash);
     constructedHash = this.getRouter().constructHash(request);
     if (this.autoCanonicalize && constructedHash !== hash) {
@@ -693,6 +701,8 @@ Controller = (function(_super) {
   function Controller() {
     return Controller.__super__.constructor.apply(this, arguments);
   }
+
+  Controller.prototype.name = null;
 
   Controller.prototype.injector = null;
 
@@ -822,6 +832,7 @@ ControllerFactory = (function(_super) {
     }
     controller = this.injector.createInstance(klass);
     controller.setInjector(this.injector);
+    controller.name = name;
     if (!(controller instanceof Controller)) {
       throw new Error("Controller " + klassName + " is not instance of Controller");
     }
@@ -1422,6 +1433,13 @@ Component = (function(_super) {
 
   Component.prototype.getFocusEl = function() {
     return this.focusEl;
+  };
+
+  Component.prototype.setEl = function(el) {
+    this.el = el;
+    if (this.contentEl) {
+      this.contentEl.inject(el);
+    }
   };
 
   Component.prototype.setParentEl = function(el, position) {
@@ -2089,7 +2107,7 @@ Container = (function(_super) {
   };
 
   Container.prototype.getComponent = function(name, need) {
-    var ext, pos;
+    var component, ext, pos;
     if (need == null) {
       need = true;
     }
@@ -2109,6 +2127,12 @@ Container = (function(_super) {
         return this.component.getComponent(ext, need);
       }
     }
+    if (!this.components.has(name)) {
+      component = this.createComponent(name);
+      if (component && component.getParent() === null) {
+        this.addComponent(name, component);
+      }
+    }
     if (this.components.has(name)) {
       if (!ext) {
         return this.components.get(name);
@@ -2118,6 +2142,19 @@ Container = (function(_super) {
     } else if (need) {
       throw new Error("Component with name '" + name + "' does not exist.");
     }
+  };
+
+  Container.prototype.createComponent = function(name) {
+    var component, method;
+    method = 'createComponent' + name.capitalize();
+    if (this[method]) {
+      component = this[method](name);
+      if (!component && !this.components.has(name)) {
+        throw new Error("Method " + this + "::" + method + "() did not return or create the desired component.");
+      }
+      return component;
+    }
+    return null;
   };
 
   Container.prototype.hasComponents = function() {
@@ -2158,6 +2195,22 @@ Container = (function(_super) {
       }
     });
     return components;
+  };
+
+  Container.prototype.findComponent = function(deep, filters) {
+    var components;
+    if (deep == null) {
+      deep = false;
+    }
+    if (filters == null) {
+      filters = {};
+    }
+    components = this.findComponents(deep, filters);
+    if (components.length > 0) {
+      return components[0];
+    } else {
+      return null;
+    }
   };
 
   Container.prototype.validateChildComponent = function(child) {};
@@ -2241,7 +2294,7 @@ Container = (function(_super) {
   };
 
   Container.prototype.hasLayout = function() {
-    return this.layout !== null;
+    return this.layout !== null && this.layout !== false;
   };
 
   Container.prototype.setLayout = function(object) {
@@ -2315,14 +2368,16 @@ Container = (function(_super) {
       el = topComponentEls[_k];
       component = this.get(el.getAttribute("miwo-component"), true);
       el.removeAttribute('miwo-component');
-      component.el = el;
+      component.setEl(el);
       component.parentEl = this.getContentEl();
       component.render();
     }
   };
 
   Container.prototype.renderComponent = function(component) {
-    component.render(this.getContentEl());
+    if (!component.preventAutoRender) {
+      component.render(this.getContentEl());
+    }
   };
 
   Container.prototype.parentShown = function(parent) {
@@ -4849,7 +4904,7 @@ Store = (function(_super) {
   Store.prototype.params = null;
 
   function Store(config) {
-    var data, proxyMgr;
+    var proxyMgr;
     if (config == null) {
       config = {};
     }
@@ -4897,17 +4952,14 @@ Store = (function(_super) {
     if (this.filter) {
       this.getFilters().set(this.filter);
     }
-    if (this.data) {
-      data = this.data;
-      this.data = [];
-      this.setData(data);
-    } else {
-      this.data = [];
-    }
+    this.data = [];
+    this.init();
     if (this.autoLoad) {
       this.load();
     }
   }
+
+  Store.prototype.init = function() {};
 
   Store.prototype.getAll = function() {
     return this.data;
@@ -7421,7 +7473,7 @@ Laoyut = (function(_super) {
     if (!this.enabled) {
       return;
     }
-    if (!component.rendered) {
+    if (!component.rendered && !component.preventAutoRender) {
       this.configureComponent(component);
       component.render(target);
       this.afterRenderComponent(component);
@@ -7931,19 +7983,20 @@ KeyListener = (function() {
       this.event = event;
     }
     this.handlers = {};
+    this.handleEvent = (function(_this) {
+      return function(e) {
+        var stopEvent;
+        if (_this.handlers[e.key]) {
+          stopEvent = _this.handlers[e.key](e);
+          if (stopEvent) {
+            e.stop();
+          }
+        }
+      };
+    })(this);
     this.resume();
     return;
   }
-
-  KeyListener.prototype.handleEvent = function(e) {
-    var stopEvent;
-    if (this.handlers[e.key]) {
-      stopEvent = this.handlers[e.key](e);
-      if (stopEvent) {
-        e.stop();
-      }
-    }
-  };
 
   KeyListener.prototype.on = function(name, handler) {
     this.handlers[name] = handler;

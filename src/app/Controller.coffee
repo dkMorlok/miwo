@@ -3,6 +3,7 @@ MiwoObject = require '../core/Object'
 
 class Controller extends MiwoObject
 
+	name: null
 	injector: null
 	application: null
 	request: null
@@ -16,19 +17,19 @@ class Controller extends MiwoObject
 
 	# Internal initialization of controller
 	# @protected
-	startup: () ->
+	startup: ->
 		return
 
 
 	# Internal rendering notification
 	# @protected
-	beforeRender: () ->
+	beforeRender: ->
 		return
 
 
 	# After render notification
 	# @protected
-	afterRender: () ->
+	afterRender: ->
 		return
 
 

@@ -36,6 +36,9 @@ class MiwoExtension extends InjectorExtension
 				flash: null
 				controllers: {}
 				run: []
+				defaultController: 'default'
+				defaultAction: 'default'
+				autoCanonicalize: true
 			}
 			templates: {
 				baseUrl: '<%baseUrl%>'
@@ -88,6 +91,7 @@ class MiwoExtension extends InjectorExtension
 		# setup application
 		injector.define 'application', Application, (service) =>
 			service.runControllers = @config.app.run
+			service.autoCanonicalize = @config.app.autoCanonicalize
 		injector.define 'flash', FlashNotificator, (service)=>
 			service.renderer = @config.app.flash
 		injector.define 'miwo.controllerFactory', ControllerFactory, (service)=>
@@ -95,7 +99,10 @@ class MiwoExtension extends InjectorExtension
 			for name,controller of @config.app.controllers
 				service.register(name,controller)
 			return
-		injector.define 'miwo.router', Router
+		injector.define 'miwo.router', Router, (service) =>
+			service.controller = @config.app.defaultController
+			service.action = @config.app.defaultAction
+			return
 		injector.define 'miwo.requestFactory', RequestFactory
 
 

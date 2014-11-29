@@ -89,7 +89,7 @@ class Laoyut extends MiwoObject
 	# @private
 	renderComponent: (component, target, position) ->
 		if !@enabled then return
-		if !component.rendered
+		if !component.rendered && !component.preventAutoRender
 			@configureComponent(component)
 			component.render(target)
 			@afterRenderComponent(component)

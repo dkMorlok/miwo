@@ -118,6 +118,10 @@ class Container extends Component
 		if name is "parent"
 			return if !ext then @component else @component.getComponent(ext, need)
 
+		if !@components.has(name)
+			component = @createComponent(name)
+			if component && component.getParent() is null
+				@addComponent(name, component)
 
 		if @components.has(name)
 			if !ext
@@ -127,6 +131,16 @@ class Container extends Component
 		else if need
 			throw new Error("Component with name '" + name + "' does not exist.")
 		return
+
+
+	createComponent: (name) ->
+		method = 'createComponent'+name.capitalize()
+		if this[method]
+			component = this[method](name)
+			if !component && !@components.has(name)
+				throw new Error("Method #{this}::#{method}() did not return or create the desired component.")
+			return component
+		return null
 
 
 	hasComponents: ->
@@ -154,6 +168,11 @@ class Container extends Component
 				component.findComponents(deep, filters, components)
 			return
 		return components
+
+
+	findComponent: (deep = false, filters = {}) ->
+		components = @findComponents(deep, filters)
+		return if components.length > 0 then components[0] else null
 
 
 	validateChildComponent: (child) ->
@@ -241,7 +260,7 @@ class Container extends Component
 
 
 	hasLayout: () ->
-		return @layout isnt null
+		return @layout isnt null && @layout isnt false
 
 
 	setLayout: (object = null) ->
@@ -301,14 +320,15 @@ class Container extends Component
 		for el in topComponentEls
 			component = @get(el.getAttribute("miwo-component"), true)
 			el.removeAttribute('miwo-component')
-			component.el = el
+			component.setEl(el)
 			component.parentEl = @getContentEl()
 			component.render()
 		return
 
 
 	renderComponent: (component) ->
-		component.render(@getContentEl())
+		if !component.preventAutoRender
+			component.render(@getContentEl())
 		return
 
 
