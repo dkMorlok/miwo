@@ -11,13 +11,13 @@
 		"dist/css/miwo.css",
 		"dist/css/miwo.min.css",
 		"dist/js/miwo.js",
-		"dist/js/miwo.min.js"
+		"dist/js/miwo.min.js",
+		"less/miwo.less",
+		"less/mixins.less"
 	],
 	"ignore": [
 		"gulpfile.js",
 		"package.json",
-		"node_modules",
-		"bower_components",
 		"examples",
 		"less",
 		"src",

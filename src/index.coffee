@@ -6,12 +6,12 @@ require './core/Element'
 miwo = require './bootstrap/Miwo'
 global.miwo = miwo
 
-# register default di extension
-miwo.registerExtension 'miwo', require './MiwoExtension'
-
 # create namespace
 Miwo = {}
 global.Miwo = Miwo
+
+# register di extension
+miwo.registerExtension('miwo', require './DiExtension')
 
 # core
 Miwo.core = require './core'
@@ -29,14 +29,6 @@ Miwo.Controller = Miwo.app.Controller
 
 # dependency injection
 Miwo.di = require './di'
-Miwo.InjectorExtension = Miwo.di.InjectorExtension
-
-# data
-Miwo.data = require './data'
-Miwo.Store = Miwo.data.Store
-Miwo.Record = Miwo.data.Record
-Miwo.Entity = Miwo.data.Entity
-Miwo.Proxy = Miwo.data.Proxy
 
 # http
 Miwo.http = require './http'

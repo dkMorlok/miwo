@@ -1,5 +1,4 @@
 InjectorFactory = require '../di/InjectorFactory'
-MiwoExtension = require '../MiwoExtension'
 
 
 class Configurator

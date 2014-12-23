@@ -63,19 +63,19 @@ gulp.task('compile-js', function() {
 		.pipe(gulp.dest(paths.js.buildDir));
 });
 
+gulp.task('minify-css', function() {
+	return gulp.src(paths.css.buildDir+paths.css.target)
+		.pipe(minifycss({keepBreaks:true}))
+		.pipe(rename({suffix:'.min'}))
+		.pipe(gulp.dest(paths.css.buildDir));
+});
+
 gulp.task('minify-js', function() {
 	return gulp.src(paths.js.buildDir+paths.js.target)
 		.pipe(optimizeBrowserify())
 		.pipe(uglify())
 		.pipe(rename({suffix:'.min'}))
 		.pipe(gulp.dest(paths.js.buildDir));
-});
-
-gulp.task('minify-css', function() {
-	return gulp.src(paths.css.buildDir+paths.css.target)
-		.pipe(minifycss({keepBreaks:true}))
-		.pipe(rename({suffix:'.min'}))
-		.pipe(gulp.dest(paths.css.buildDir));
 });
 
 gulp.task('build', function(cb) {

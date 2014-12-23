@@ -101,6 +101,9 @@ class Application extends MiwoObject
 
 	executeRequestByHash: ->
 		hash = document.location.hash.substr(1).toLowerCase()
+		if !hash && !@autoCanonicalize
+			return
+
 		request = @getRouter().constructRequest(hash)
 		constructedHash = @getRouter().constructHash(request)
 

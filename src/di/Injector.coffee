@@ -14,6 +14,7 @@ class Injector
 		@services = {}
 		@globals = {}
 		@set('injector', this)
+		if !@params.namespace then @params.namespace = 'App'
 
 
 	define: (name, klass, cb = null) ->

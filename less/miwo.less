@@ -1,7 +1,6 @@
 @import "mixins.less";
 
 @defaultTransitionDuration: 0.5s;
-@overlayAnimate: true;
 @overlayDuration: 0.3s;
 
 
@@ -45,38 +44,6 @@ body, html {
 }
 
 
-/* windows */
-.miwo-window {
-	position: relative;
-	margin-top: 0px;
-	&-tools {
-		float: right;
-		opacity: 0.5;
-		i {
-			float: left;
-			cursor: pointer;
-			margin-left: 10px;
-		}
-	}
-}
-
-
-/* buttons */
-div:focus, .btn:focus, .btn:active:focus, .btn.active:focus {
-	outline: 0 !important;
-}
-.btn:focus {
-	color: #333;
-	background-color: #fff;
-	border-color: #ccc;
-}
-.btn.active:focus {
-	color: #333;
-	background-color: #e6e6e6;
-	border-color: #adadad;
-}
-
-
 /* utils */
 .miwo-overlayed {
 	overflow-x: hidden;
@@ -90,7 +57,5 @@ div:focus, .btn:focus, .btn:active:focus, .btn.active:focus {
 	bottom: 0;
 	opacity: 0;
 	display: "none";
-	& when (@overlayAnimate = true) {
-		.transition(all @overlayDuration);
-	}
+	.transition(all @overlayDuration);
 }

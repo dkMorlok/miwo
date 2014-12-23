@@ -111,6 +111,9 @@ class Component extends MiwoObject
 	# @property {Boolean}
 	disabled: false
 
+	# @property {String}
+	role: null
+
 	_isGeneratedId: false
 	zIndexMgr: null
 	componentMgr: null
@@ -446,7 +449,8 @@ class Component extends MiwoObject
 		# setup properties
 		el.set("miwo-name", @name)
 		el.store("component", this)
-		el.set( "id", @id)  if !@_isGeneratedId
+		el.set("id", @id)  if !@_isGeneratedId
+		el.set("role", @role)  if !@role
 
 		# setup classes
 		el.addClass(@cls)  if @cls
