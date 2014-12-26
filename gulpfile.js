@@ -20,6 +20,10 @@ var paths = {
 		target: 'miwo.js',
 		buildDir: './dist/js/'
 	},
+	assets: {
+		src: 'less/*.less',
+		buildDir: './dist/less/'
+	},
 	watch: {
 		coffee: ['src/**/*.coffee'],
 		less: ['less/*.less']
@@ -63,6 +67,11 @@ gulp.task('compile-js', function() {
 		.pipe(gulp.dest(paths.js.buildDir));
 });
 
+gulp.task('copy-assets', function() {
+	return gulp.src(paths.assets.src)
+		.pipe(gulp.dest(paths.assets.buildDir));
+});
+
 gulp.task('minify-css', function() {
 	return gulp.src(paths.css.buildDir+paths.css.target)
 		.pipe(minifycss({keepBreaks:true}))
@@ -79,7 +88,7 @@ gulp.task('minify-js', function() {
 });
 
 gulp.task('build', function(cb) {
-	sequence(['compile-js', 'compile-css'], cb);
+	sequence(['compile-js', 'compile-css', 'copy-assets'], cb);
 });
 
 gulp.task('dist', function(cb) {

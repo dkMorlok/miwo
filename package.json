@@ -2,7 +2,6 @@
 	"name": "miwo",
 	"version": "0.0.2",
 	"description": "MVC framework in CoffeeScript with Dependency Injection",
-	"main": "./dist/js/miwo.js",
 	"devDependencies": {
 		"gulp": "~3.8.10",
 		"gulp-util": "~3.0.1",

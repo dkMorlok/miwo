@@ -23,10 +23,6 @@ Miwo.component = require './component'
 Miwo.Component = Miwo.component.Component
 Miwo.Container = Miwo.component.Container
 
-# application
-Miwo.app = require './app'
-Miwo.Controller = Miwo.app.Controller
-
 # dependency injection
 Miwo.di = require './di'
 

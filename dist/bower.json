@@ -3,25 +3,18 @@
 	"description": "MVC framework in CoffeeScript with Dependency Injection",
 	"version": "0.0.3",
 	"keywords": ["framework", "mvc", "coffeescript"],
-	"homepage": "http://www.miwojs.com",
 	"authors": [
 		"Dusan Kmet <morlokdk@gmail.com>"
 	],
 	"main": [
-		"dist/css/miwo.css",
-		"dist/css/miwo.min.css",
-		"dist/js/miwo.js",
-		"dist/js/miwo.min.js",
+		"css/miwo.css",
+		"css/miwo.min.css",
+		"js/miwo.js",
+		"js/miwo.min.js",
 		"less/miwo.less",
 		"less/mixins.less"
 	],
 	"ignore": [
-		"gulpfile.js",
-		"package.json",
-		"examples",
-		"less",
-		"src",
-		"tests"
 	],
 	"dependencies": {
 		"mootools-core": "latest"

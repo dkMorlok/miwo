@@ -1,12 +1,5 @@
 InjectorExtension = require './di/InjectorExtension'
 
-# app module
-Application = require './app/Application'
-Router = require './app/Router'
-RequestFactory = require './app/RequestFactory'
-FlashNotificator = require './app/FlashNotificator'
-ControllerFactory = require './app/ControllerFactory'
-
 # http module
 RequestManager = require './http/RequestManager'
 CookieManager = require './http/CookieManager'
@@ -25,14 +18,6 @@ class MiwoExtension extends InjectorExtension
 
 	init: ->
 		@setConfig
-			app: {
-				flash: null
-				controllers: {}
-				run: []
-				defaultController: 'default'
-				defaultAction: 'default'
-				autoCanonicalize: true
-			}
 			http: {
 				params: {}
 				plugins: {
@@ -63,24 +48,6 @@ class MiwoExtension extends InjectorExtension
 		# setup di
 		for name,service of @config.di.services
 			injector.setGlobal(name,service)
-
-
-		# setup application
-		injector.define 'application', Application, (service) =>
-			service.runControllers = @config.app.run
-			service.autoCanonicalize = @config.app.autoCanonicalize
-		injector.define 'flash', FlashNotificator, (service)=>
-			service.renderer = @config.app.flash
-		injector.define 'miwo.controllerFactory', ControllerFactory, (service)=>
-			service.namespace = @config.app.namespace
-			for name,controller of @config.app.controllers
-				service.register(name,controller)
-			return
-		injector.define 'miwo.router', Router, (service) =>
-			service.controller = @config.app.defaultController
-			service.action = @config.app.defaultAction
-			return
-		injector.define 'miwo.requestFactory', RequestFactory
 
 
 		# setup locale

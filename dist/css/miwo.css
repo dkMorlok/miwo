@@ -30,37 +30,6 @@ html {
 .miwo-layout-absolute > .miwo-layout-item > .miwo-ct {
   overflow: auto;
 }
-/* windows */
-.miwo-window {
-  position: relative;
-  margin-top: 0px;
-}
-.miwo-window-tools {
-  float: right;
-  opacity: 0.5;
-}
-.miwo-window-tools i {
-  float: left;
-  cursor: pointer;
-  margin-left: 10px;
-}
-/* buttons */
-div:focus,
-.btn:focus,
-.btn:active:focus,
-.btn.active:focus {
-  outline: 0 !important;
-}
-.btn:focus {
-  color: #333;
-  background-color: #fff;
-  border-color: #ccc;
-}
-.btn.active:focus {
-  color: #333;
-  background-color: #e6e6e6;
-  border-color: #adadad;
-}
 /* utils */
 .miwo-overlayed {
   overflow-x: hidden;

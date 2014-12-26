@@ -302,21 +302,11 @@ function isUndefined(arg) {
 }
 
 },{}],2:[function(require,module,exports){
-var Application, ComponentManager, ComponentSelector, ControllerFactory, CookieManager, FlashNotificator, InjectorExtension, MiwoExtension, RequestFactory, RequestManager, Router, Translator, ZIndexManager,
+var ComponentManager, ComponentSelector, CookieManager, InjectorExtension, MiwoExtension, RequestManager, Translator, ZIndexManager,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 InjectorExtension = require('./di/InjectorExtension');
-
-Application = require('./app/Application');
-
-Router = require('./app/Router');
-
-RequestFactory = require('./app/RequestFactory');
-
-FlashNotificator = require('./app/FlashNotificator');
-
-ControllerFactory = require('./app/ControllerFactory');
 
 RequestManager = require('./http/RequestManager');
 
@@ -339,14 +329,6 @@ MiwoExtension = (function(_super) {
 
   MiwoExtension.prototype.init = function() {
     this.setConfig({
-      app: {
-        flash: null,
-        controllers: {},
-        run: [],
-        defaultController: 'default',
-        defaultAction: 'default',
-        autoCanonicalize: true
-      },
       http: {
         params: {},
         plugins: {
@@ -382,35 +364,6 @@ MiwoExtension = (function(_super) {
       service = _ref[name];
       injector.setGlobal(name, service);
     }
-    injector.define('application', Application, (function(_this) {
-      return function(service) {
-        service.runControllers = _this.config.app.run;
-        return service.autoCanonicalize = _this.config.app.autoCanonicalize;
-      };
-    })(this));
-    injector.define('flash', FlashNotificator, (function(_this) {
-      return function(service) {
-        return service.renderer = _this.config.app.flash;
-      };
-    })(this));
-    injector.define('miwo.controllerFactory', ControllerFactory, (function(_this) {
-      return function(service) {
-        var controller, _ref1;
-        service.namespace = _this.config.app.namespace;
-        _ref1 = _this.config.app.controllers;
-        for (name in _ref1) {
-          controller = _ref1[name];
-          service.register(name, controller);
-        }
-      };
-    })(this));
-    injector.define('miwo.router', Router, (function(_this) {
-      return function(service) {
-        service.controller = _this.config.app.defaultController;
-        service.action = _this.config.app.defaultAction;
-      };
-    })(this));
-    injector.define('miwo.requestFactory', RequestFactory);
     injector.define('translator', Translator, (function(_this) {
       return function(service) {};
     })(this));
@@ -444,547 +397,7 @@ MiwoExtension = (function(_super) {
 module.exports = MiwoExtension;
 
 
-},{"./app/Application":3,"./app/ControllerFactory":5,"./app/FlashNotificator":7,"./app/RequestFactory":9,"./app/Router":10,"./component/ComponentManager":15,"./component/ComponentSelector":16,"./component/ZIndexManager":18,"./di/InjectorExtension":28,"./http/CookieManager":32,"./http/RequestManager":35,"./http/plugins":37,"./locale/Translator":45}],3:[function(require,module,exports){
-var Application, EventManager, MiwoObject,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-MiwoObject = require('../core/Object');
-
-EventManager = require('./EventManager');
-
-Application = (function(_super) {
-  __extends(Application, _super);
-
-  Application.inject('injector');
-
-  Application.inject('controllerFactory', 'miwo.controllerFactory');
-
-  Application.prototype.eventMgr = null;
-
-  Application.prototype.componentMgr = null;
-
-  Application.prototype.viewport = null;
-
-  Application.prototype.rendered = false;
-
-  Application.prototype.controllers = null;
-
-  Application.prototype.runControllers = null;
-
-  Application.prototype.autoCanonicalize = true;
-
-  function Application(config) {
-    this.controllers = {};
-    this.eventMgr = new EventManager();
-    Application.__super__.constructor.call(this, config);
-    return;
-  }
-
-  Application.prototype.setInjector = function(injector) {
-    this.injector = injector;
-    if (!injector.has('viewport')) {
-      throw new Error("Missing 'viewport' service. Viewport is required to render your application");
-    }
-  };
-
-  Application.prototype.run = function(render) {
-    var name, _i, _len, _ref;
-    if (render == null) {
-      render = null;
-    }
-    _ref = this.runControllers;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      name = _ref[_i];
-      this.getController(name).startup();
-    }
-    if (render) {
-      this.render(render);
-    }
-  };
-
-  Application.prototype.render = function(target) {
-    var controller, name, viewport, _ref, _ref1;
-    if (target == null) {
-      target = null;
-    }
-    if (!this.rendered) {
-      this.rendered = true;
-      viewport = this.getViewport();
-      _ref = this.controllers;
-      for (name in _ref) {
-        controller = _ref[name];
-        controller.beforeRender();
-      }
-      viewport.render(target || miwo.body);
-      _ref1 = this.controllers;
-      for (name in _ref1) {
-        controller = _ref1[name];
-        controller.afterRender();
-      }
-      window.onhashchange = this.executeRequestByHash.bind(this);
-      this.executeRequestByHash();
-    }
-  };
-
-  Application.prototype.getController = function(name) {
-    if (!this.controllers[name]) {
-      this.controllers[name] = this.controllerFactory.create(name);
-      this.controllers[name].application = this;
-    }
-    return this.controllers[name];
-  };
-
-  Application.prototype.control = function(target, events) {
-    if (Type.isString(target)) {
-      this.eventMgr.control(target, events);
-    } else {
-      target.on(events);
-    }
-  };
-
-  Application.prototype.getViewport = function() {
-    return this.injector.get('viewport');
-  };
-
-  Application.prototype.getRouter = function() {
-    return this.injector.get('miwo.router');
-  };
-
-  Application.prototype.execute = function(request) {
-    this.getController(request.controller).execute(request);
-  };
-
-  Application.prototype.forward = function(request) {
-    setTimeout(((function(_this) {
-      return function() {
-        return _this.execute(request);
-      };
-    })(this)), 1);
-  };
-
-  Application.prototype.redirect = function(request) {
-    document.location.hash = this.getRouter().constructHash(request);
-  };
-
-  Application.prototype.executeRequestByHash = function() {
-    var constructedHash, hash, request;
-    hash = document.location.hash.substr(1).toLowerCase();
-    if (!hash && !this.autoCanonicalize) {
-      return;
-    }
-    request = this.getRouter().constructRequest(hash);
-    constructedHash = this.getRouter().constructHash(request);
-    if (this.autoCanonicalize && constructedHash !== hash) {
-      document.location.hash = constructedHash;
-      return;
-    }
-    this.execute(request);
-  };
-
-  return Application;
-
-})(MiwoObject);
-
-module.exports = Application;
-
-
-},{"../core/Object":23,"./EventManager":6}],4:[function(require,module,exports){
-var Controller, MiwoObject,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  __slice = [].slice;
-
-MiwoObject = require('../core/Object');
-
-Controller = (function(_super) {
-  __extends(Controller, _super);
-
-  function Controller() {
-    return Controller.__super__.constructor.apply(this, arguments);
-  }
-
-  Controller.prototype.name = null;
-
-  Controller.prototype.injector = null;
-
-  Controller.prototype.application = null;
-
-  Controller.prototype.request = null;
-
-  Controller.service = function(prop, service) {
-    if (service == null) {
-      service = null;
-    }
-    Object.defineProperty(this.prototype, prop, {
-      get: function() {
-        return this.injector.get(service || prop);
-      }
-    });
-  };
-
-  Controller.prototype.startup = function() {};
-
-  Controller.prototype.beforeRender = function() {};
-
-  Controller.prototype.afterRender = function() {};
-
-  Controller.prototype.control = function(target, events) {
-    this.application.control(target, this.boundEvents(events));
-  };
-
-  Controller.prototype.getViewport = function() {
-    return this.application.getViewport();
-  };
-
-  Controller.prototype.setInjector = function(injector) {
-    this.injector = injector;
-  };
-
-  Controller.prototype.boundEvents = function(events) {
-    var callback, name;
-    for (name in events) {
-      callback = events[name];
-      events[name] = this.boundEvent(callback);
-    }
-    return events;
-  };
-
-  Controller.prototype.boundEvent = function(callback) {
-    return (function(_this) {
-      return function() {
-        var args;
-        args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-        if (Type.isString(callback)) {
-          return _this[callback].apply(_this, args);
-        } else {
-          return callback.apply(_this, args);
-        }
-      };
-    })(this);
-  };
-
-  Controller.prototype.forward = function(code, params) {
-    this.request.executed = true;
-    this.application.forward(this.createRequest(code, params));
-  };
-
-  Controller.prototype.redirect = function(code, params) {
-    this.request.executed = true;
-    this.application.redirect(this.createRequest(code, params));
-  };
-
-  Controller.prototype.createRequest = function(code, params) {
-    return this.injector.get('miwo.requestFactory').create(code, params, {
-      name: this.name,
-      action: this.action
-    });
-  };
-
-  Controller.prototype.execute = function(request) {
-    this.request = request;
-  };
-
-  return Controller;
-
-})(MiwoObject);
-
-module.exports = Controller;
-
-
-},{"../core/Object":23}],5:[function(require,module,exports){
-var Controller, ControllerFactory, MiwoObject,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-Controller = require('./Controller');
-
-MiwoObject = require('../core/Object');
-
-ControllerFactory = (function(_super) {
-  __extends(ControllerFactory, _super);
-
-  ControllerFactory.prototype.injector = ControllerFactory.inject('injector');
-
-  ControllerFactory.prototype.namespace = 'App';
-
-  ControllerFactory.prototype.controllers = null;
-
-  function ControllerFactory(config) {
-    ControllerFactory.__super__.constructor.call(this, config);
-    this.controllers = {};
-  }
-
-  ControllerFactory.prototype.register = function(name, klass) {
-    this.controllers[name] = klass;
-    return this;
-  };
-
-  ControllerFactory.prototype.create = function(name) {
-    var controller, e, klass, klassName;
-    klassName = this.formatClassName(name);
-    try {
-      klass = eval(klassName);
-    } catch (_error) {
-      e = _error;
-      throw new Error("Controller class " + klassName + " is bad defined");
-    }
-    if (typeof klass !== 'function') {
-      throw new Error("Controller class " + klassName + " is not constructor");
-    }
-    controller = this.injector.createInstance(klass);
-    controller.setInjector(this.injector);
-    controller.name = name;
-    if (!(controller instanceof Controller)) {
-      throw new Error("Controller " + klassName + " is not instance of Controller");
-    }
-    return controller;
-  };
-
-  ControllerFactory.prototype.formatClassName = function(name) {
-    if (this.controllers[name]) {
-      return this.controllers[name];
-    } else {
-      return this.namespace + '.controllers.' + name.capitalize() + 'Controller';
-    }
-  };
-
-  return ControllerFactory;
-
-})(MiwoObject);
-
-module.exports = ControllerFactory;
-
-
-},{"../core/Object":23,"./Controller":4}],6:[function(require,module,exports){
-var EventManager, MiwoObject,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-MiwoObject = require('../core/Object');
-
-EventManager = (function(_super) {
-  __extends(EventManager, _super);
-
-  EventManager.prototype.selectors = null;
-
-  function EventManager() {
-    EventManager.__super__.constructor.call(this);
-    this.selectors = [];
-    miwo.componentMgr.on("register", this.bound("onRegister"));
-    miwo.componentMgr.on("unregister", this.bound("onUnregister"));
-    return;
-  }
-
-  EventManager.prototype.control = function(selector, events) {
-    this.selectors.push({
-      selector: selector,
-      events: events
-    });
-  };
-
-  EventManager.prototype.onRegister = function(component) {
-    var event, item, name, _i, _len, _ref, _ref1;
-    _ref = this.selectors;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      item = _ref[_i];
-      if (component.is(item.selector)) {
-        _ref1 = item.events;
-        for (name in _ref1) {
-          event = _ref1[name];
-          component.on(name, event);
-        }
-      }
-    }
-  };
-
-  EventManager.prototype.onUnregister = function(component) {
-    var event, item, name, _i, _len, _ref, _ref1;
-    _ref = this.selectors;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      item = _ref[_i];
-      if (component.is(item.selector)) {
-        _ref1 = item.events;
-        for (name in _ref1) {
-          event = _ref1[name];
-          component.un(name, event);
-        }
-      }
-    }
-  };
-
-  EventManager.prototype.doDestroy = function() {
-    miwo.componentMgr.un("register", this.bound("onRegister"));
-    miwo.componentMgr.un("unregister", this.bound("onUnregister"));
-  };
-
-  return EventManager;
-
-})(MiwoObject);
-
-module.exports = EventManager;
-
-
-},{"../core/Object":23}],7:[function(require,module,exports){
-var FlashNotificator;
-
-FlashNotificator = (function() {
-  FlashNotificator.prototype.renderer = null;
-
-  function FlashNotificator() {
-    this.renderer = function(message, type) {
-      if (console) {
-        console.log('FLASH:', message, type);
-      }
-    };
-  }
-
-  FlashNotificator.prototype.error = function(message) {
-    this.message(message, 'error');
-  };
-
-  FlashNotificator.prototype.info = function(message) {
-    this.message(message, 'info');
-  };
-
-  FlashNotificator.prototype.warning = function(message) {
-    this.message(message, 'warning');
-  };
-
-  FlashNotificator.prototype.message = function(message, type) {
-    if (!this.renderer) {
-      return;
-    }
-    this.renderer(message, type);
-  };
-
-  return FlashNotificator;
-
-})();
-
-module.exports = FlashNotificator;
-
-
-},{}],8:[function(require,module,exports){
-var Request;
-
-Request = (function() {
-  Request.prototype.isRequest = true;
-
-  Request.prototype.controller = null;
-
-  Request.prototype.action = null;
-
-  Request.prototype.params = null;
-
-  function Request(controller, action, params) {
-    this.controller = controller;
-    this.action = action;
-    if (params == null) {
-      params = {};
-    }
-    this.params = Object.merge({}, params);
-  }
-
-  return Request;
-
-})();
-
-module.exports = Request;
-
-
-},{}],9:[function(require,module,exports){
-var Request, RequestFactory;
-
-Request = require('./Request');
-
-RequestFactory = (function() {
-  function RequestFactory() {}
-
-  RequestFactory.prototype.codeRe = /(([a-zA-Z]+)\:)?([a-z][a-zA-Z]+)/;
-
-  RequestFactory.prototype.create = function(code, params, defaults) {
-    var action, controller, parts;
-    parts = code.match(this.codeRe);
-    if (!parts) {
-      throw new Error("Bad redirect CODE");
-    }
-    controller = parts[2] !== void 0 ? parts[2] : defaults.name;
-    action = parts[3] !== 'this' ? defaults.action : parts[3];
-    return new Request(controller, action, params);
-  };
-
-  return RequestFactory;
-
-})();
-
-module.exports = RequestFactory;
-
-
-},{"./Request":8}],10:[function(require,module,exports){
-var MiwoObject, Request, Router,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-Request = require('./Request');
-
-MiwoObject = require('../core/Object');
-
-Router = (function(_super) {
-  __extends(Router, _super);
-
-  function Router() {
-    return Router.__super__.constructor.apply(this, arguments);
-  }
-
-  Router.prototype.controller = "default";
-
-  Router.prototype.action = "default";
-
-  Router.prototype.constructRequest = function(hash) {
-    var action, controller, match, params;
-    match = hash.match(/^(([a-zA-Z]*)(\:([a-z][a-zA-Z]+))?(\?(.*))?)?$/);
-    controller = match[2] || this.controller;
-    action = match[4] || this.action;
-    params = (match[6] ? match[6].parseQueryString() : {});
-    return new Request(controller, action, params);
-  };
-
-  Router.prototype.constructHash = function(request) {
-    var hash, query;
-    hash = request.controller;
-    if ((request.action && request.action !== this.action) || (request.params && Object.getLength(request.params) > 0)) {
-      hash += ":" + request.action;
-      if (request.params) {
-        query = Object.toQueryString(request.params);
-        if (query) {
-          hash += "?" + query;
-        }
-      }
-    }
-    return hash;
-  };
-
-  return Router;
-
-})(MiwoObject);
-
-module.exports = Router;
-
-
-},{"../core/Object":23,"./Request":8}],11:[function(require,module,exports){
-module.exports = {
-  Application: require('./Application'),
-  Controller: require('./Controller'),
-  Router: require('./Router'),
-  Request: require('./Request'),
-  RequestFactory: require('./RequestFactory'),
-  FlashNotificator: require('./FlashNotificator'),
-  EventManager: require('./EventManager')
-};
-
-
-},{"./Application":3,"./Controller":4,"./EventManager":6,"./FlashNotificator":7,"./Request":8,"./RequestFactory":9,"./Router":10}],12:[function(require,module,exports){
+},{"./component/ComponentManager":6,"./component/ComponentSelector":7,"./component/ZIndexManager":9,"./di/InjectorExtension":19,"./http/CookieManager":23,"./http/RequestManager":26,"./http/plugins":28,"./locale/Translator":36}],3:[function(require,module,exports){
 var Configurator, InjectorFactory;
 
 InjectorFactory = require('../di/InjectorFactory');
@@ -1021,7 +434,7 @@ Configurator = (function() {
 module.exports = Configurator;
 
 
-},{"../di/InjectorFactory":29}],13:[function(require,module,exports){
+},{"../di/InjectorFactory":20}],4:[function(require,module,exports){
 var Configurator, Miwo;
 
 Configurator = require('./Configurator');
@@ -1163,7 +576,7 @@ Miwo = (function() {
 module.exports = new Miwo;
 
 
-},{"./Configurator":12}],14:[function(require,module,exports){
+},{"./Configurator":3}],5:[function(require,module,exports){
 var Component, MiwoObject,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -1787,7 +1200,7 @@ Component = (function(_super) {
 module.exports = Component;
 
 
-},{"../core/Object":23}],15:[function(require,module,exports){
+},{"../core/Object":14}],6:[function(require,module,exports){
 var ComponentManager, MiwoObject,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -1859,7 +1272,7 @@ ComponentManager = (function(_super) {
 module.exports = ComponentManager;
 
 
-},{"../core/Object":23}],16:[function(require,module,exports){
+},{"../core/Object":14}],7:[function(require,module,exports){
 var ComponentSelector;
 
 ComponentSelector = (function() {
@@ -1907,7 +1320,7 @@ ComponentSelector = (function() {
 module.exports = ComponentSelector;
 
 
-},{}],17:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 var Collection, Component, Container, layout,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -2316,7 +1729,7 @@ Container = (function(_super) {
 module.exports = Container;
 
 
-},{"../layout":44,"../utils/Collection":47,"./Component":14}],18:[function(require,module,exports){
+},{"../layout":35,"../utils/Collection":38,"./Component":5}],9:[function(require,module,exports){
 var MiwoObject, Overlay, ZIndexManager,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -2512,14 +1925,14 @@ ZIndexManager = (function(_super) {
 module.exports = ZIndexManager;
 
 
-},{"../core/Object":23,"../utils/Overlay":49}],19:[function(require,module,exports){
+},{"../core/Object":14,"../utils/Overlay":40}],10:[function(require,module,exports){
 module.exports = {
   Component: require('./Component'),
   Container: require('./Container')
 };
 
 
-},{"./Component":14,"./Container":17}],20:[function(require,module,exports){
+},{"./Component":5,"./Container":8}],11:[function(require,module,exports){
 Function.prototype.getter = function(prop, getter) {
   Object.defineProperty(this.prototype, prop, {
     get: getter,
@@ -2550,7 +1963,7 @@ Function.prototype.inject = function(name, service) {
 };
 
 
-},{}],21:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 var EventShortcuts;
 
 Element.Properties.cls = {
@@ -2723,7 +2136,7 @@ Events.implement(EventShortcuts);
 Element.implement(EventShortcuts);
 
 
-},{}],22:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 var Events, NativeEvents,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -2947,7 +2360,7 @@ Events = (function(_super) {
 module.exports = Events;
 
 
-},{"events":1}],23:[function(require,module,exports){
+},{"events":1}],14:[function(require,module,exports){
 var Events, MiwoObject,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -3029,7 +2442,7 @@ MiwoObject.addMethod = function(name, method) {
 module.exports = MiwoObject;
 
 
-},{"./Events":22}],24:[function(require,module,exports){
+},{"./Events":13}],15:[function(require,module,exports){
 var __slice = [].slice;
 
 Type.extend({
@@ -3257,14 +2670,14 @@ source: http://github.com/eneko/Array.sortBy
 })();
 
 
-},{}],25:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 module.exports = {
   Events: require('./Events'),
   Object: require('./Object')
 };
 
 
-},{"./Events":22,"./Object":23}],26:[function(require,module,exports){
+},{"./Events":13,"./Object":14}],17:[function(require,module,exports){
 var DiHelper;
 
 DiHelper = (function() {
@@ -3392,7 +2805,7 @@ DiHelper = (function() {
 module.exports = new DiHelper;
 
 
-},{}],27:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 var DiHelper, Injector, Service;
 
 Service = require('./Service');
@@ -3519,7 +2932,7 @@ Injector = (function() {
 module.exports = Injector;
 
 
-},{"./DiHelper":26,"./Service":30}],28:[function(require,module,exports){
+},{"./DiHelper":17,"./Service":21}],19:[function(require,module,exports){
 var DiHelper, InjectorExtension;
 
 DiHelper = require('./DiHelper');
@@ -3546,7 +2959,7 @@ InjectorExtension = (function() {
 module.exports = InjectorExtension;
 
 
-},{"./DiHelper":26}],29:[function(require,module,exports){
+},{"./DiHelper":17}],20:[function(require,module,exports){
 var DiHelper, Injector, InjectorFactory;
 
 Injector = require('./Injector');
@@ -3641,7 +3054,7 @@ InjectorFactory = (function() {
 module.exports = InjectorFactory;
 
 
-},{"./DiHelper":26,"./Injector":27}],30:[function(require,module,exports){
+},{"./DiHelper":17,"./Injector":18}],21:[function(require,module,exports){
 var DiHelper, Service;
 
 DiHelper = require('./DiHelper');
@@ -3748,7 +3161,7 @@ Service = (function() {
 module.exports = Service;
 
 
-},{"./DiHelper":26}],31:[function(require,module,exports){
+},{"./DiHelper":17}],22:[function(require,module,exports){
 module.exports = {
   Injector: require('./Injector'),
   InjectorFactory: require('./InjectorFactory'),
@@ -3756,7 +3169,7 @@ module.exports = {
 };
 
 
-},{"./Injector":27,"./InjectorExtension":28,"./InjectorFactory":29}],32:[function(require,module,exports){
+},{"./Injector":18,"./InjectorExtension":19,"./InjectorFactory":20}],23:[function(require,module,exports){
 var CookieManager, CookieSection;
 
 CookieSection = require('./CookieSection');
@@ -3809,7 +3222,7 @@ CookieManager = (function() {
 module.exports = CookieManager;
 
 
-},{"./CookieSection":33}],33:[function(require,module,exports){
+},{"./CookieSection":24}],24:[function(require,module,exports){
 var CookieSection;
 
 CookieSection = (function() {
@@ -3872,7 +3285,7 @@ CookieSection = (function() {
 module.exports = CookieSection;
 
 
-},{}],34:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 var HttpRequest,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -3945,7 +3358,7 @@ HttpRequest = (function(_super) {
 module.exports = HttpRequest;
 
 
-},{}],35:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 var HttpRequest, MiwoObject, RequestManager,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -4040,14 +3453,14 @@ RequestManager = (function(_super) {
 module.exports = RequestManager;
 
 
-},{"../core/Object":23,"./HttpRequest":34}],36:[function(require,module,exports){
+},{"../core/Object":14,"./HttpRequest":25}],27:[function(require,module,exports){
 module.exports = {
   HttpRequest: require('./HttpRequest'),
   RequestManager: require('./RequestManager')
 };
 
 
-},{"./HttpRequest":34,"./RequestManager":35}],37:[function(require,module,exports){
+},{"./HttpRequest":25,"./RequestManager":26}],28:[function(require,module,exports){
 var ErrorPlugin, FailurePlugin, RedirectPlugin;
 
 RedirectPlugin = (function() {
@@ -4098,7 +3511,7 @@ module.exports = {
 };
 
 
-},{}],38:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 (function (global){
 var Miwo, miwo;
 
@@ -4130,10 +3543,6 @@ Miwo.Component = Miwo.component.Component;
 
 Miwo.Container = Miwo.component.Container;
 
-Miwo.app = require('./app');
-
-Miwo.Controller = Miwo.app.Controller;
-
 Miwo.di = require('./di');
 
 Miwo.http = require('./http');
@@ -4144,7 +3553,7 @@ Miwo.utils = require('./utils');
 
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./DiExtension":2,"./app":11,"./bootstrap/Miwo":13,"./component":19,"./core":25,"./core/Common":20,"./core/Element":21,"./core/Types":24,"./di":31,"./http":36,"./locale":46,"./utils":50}],39:[function(require,module,exports){
+},{"./DiExtension":2,"./bootstrap/Miwo":4,"./component":10,"./core":16,"./core/Common":11,"./core/Element":12,"./core/Types":15,"./di":22,"./http":27,"./locale":37,"./utils":41}],30:[function(require,module,exports){
 var AbsoluteLayout, Layout,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -4188,7 +3597,7 @@ AbsoluteLayout = (function(_super) {
 module.exports = AbsoluteLayout;
 
 
-},{"./Layout":43}],40:[function(require,module,exports){
+},{"./Layout":34}],31:[function(require,module,exports){
 var AutoLayout, Layout,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -4212,7 +3621,7 @@ AutoLayout = (function(_super) {
 module.exports = AutoLayout;
 
 
-},{"./Layout":43}],41:[function(require,module,exports){
+},{"./Layout":34}],32:[function(require,module,exports){
 var FitLayout, Layout,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -4236,7 +3645,7 @@ FitLayout = (function(_super) {
 module.exports = FitLayout;
 
 
-},{"./Layout":43}],42:[function(require,module,exports){
+},{"./Layout":34}],33:[function(require,module,exports){
 var FormLayout, Layout,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -4260,7 +3669,7 @@ FormLayout = (function(_super) {
 module.exports = FormLayout;
 
 
-},{"./Layout":43}],43:[function(require,module,exports){
+},{"./Layout":34}],34:[function(require,module,exports){
 var Laoyut, MiwoObject,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -4423,7 +3832,7 @@ Laoyut = (function(_super) {
 module.exports = Laoyut;
 
 
-},{"../core/Object":23}],44:[function(require,module,exports){
+},{"../core/Object":14}],35:[function(require,module,exports){
 module.exports = {
   Absolute: require('./Absolute'),
   Form: require('./Form'),
@@ -4436,7 +3845,7 @@ module.exports = {
 };
 
 
-},{"./Absolute":39,"./Auto":40,"./Fit":41,"./Form":42,"./Layout":43}],45:[function(require,module,exports){
+},{"./Absolute":30,"./Auto":31,"./Fit":32,"./Form":33,"./Layout":34}],36:[function(require,module,exports){
 var Translator;
 
 Translator = (function() {
@@ -4510,13 +3919,13 @@ Translator = (function() {
 module.exports = Translator;
 
 
-},{}],46:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 module.exports = {
   Translator: require('./Translator')
 };
 
 
-},{"./Translator":45}],47:[function(require,module,exports){
+},{"./Translator":36}],38:[function(require,module,exports){
 var Collection;
 
 Collection = (function() {
@@ -4690,7 +4099,7 @@ Collection = (function() {
 module.exports = Collection;
 
 
-},{}],48:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 var KeyListener;
 
 KeyListener = (function() {
@@ -4756,7 +4165,7 @@ KeyListener = (function() {
 module.exports = KeyListener;
 
 
-},{}],49:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 var MiwoObject, Overlay,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -4836,7 +4245,7 @@ Overlay = (function(_super) {
 module.exports = Overlay;
 
 
-},{"../core/Object":23}],50:[function(require,module,exports){
+},{"../core/Object":14}],41:[function(require,module,exports){
 module.exports = {
   Overlay: require('./Overlay'),
   Collection: require('./Collection'),
@@ -4844,4 +4253,4 @@ module.exports = {
 };
 
 
-},{"./Collection":47,"./KeyListener":48,"./Overlay":49}]},{},[38])
+},{"./Collection":38,"./KeyListener":39,"./Overlay":40}]},{},[29])
