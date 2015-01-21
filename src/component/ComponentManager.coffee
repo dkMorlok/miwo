@@ -5,6 +5,7 @@ class ComponentManager extends MiwoObject
 
 	list: null
 	names: null
+	roots: null
 	id: 1
 
 
@@ -12,6 +13,7 @@ class ComponentManager extends MiwoObject
 		super()
 		@list = {}
 		@names = {}
+		@roots = []
 		return
 
 
@@ -26,29 +28,38 @@ class ComponentManager extends MiwoObject
 		return group + @names[group]
 
 
-	register: (comp) ->
-		if comp.componentMgr then throw new Error("Component #{comp} with id #{comp.id} already exists.")
-		comp.componentMgr = this
-		@list[comp.id] = comp
-		@emit("register", comp)
+	register: (cmp) ->
+		if cmp.componentMgr then throw new Error("Component #{comp} with id #{cmp.id} already exists.")
+		cmp.componentMgr = this
+		@list[cmp.id] = cmp
+		@roots.include(cmp)
+		cmp.on 'attached', (cmp) =>
+			@roots.erase(cmp)
+			return
+		cmp.on 'detached', (cmp) =>
+			@roots.include(cmp) if !cmp.destroying
+			return
+		@emit("register", cmp)
 		return
 
 
-	unregister: (comp) ->
-		if @list[comp.id]
-			delete @list[comp.id]
-			delete comp.componentMgr
-			@emit("unregister", comp)
+	unregister: (cmp) ->
+		if @roots.contains(cmp)
+			@roots.erase(cmp)
+		if @list[cmp.id]
+			delete @list[cmp.id]
+			delete cmp.componentMgr
+			@emit("unregister", cmp)
 		return
 
 
-	beforeRender: (component) ->
-		@emit("beforerender", component)
+	beforeRender: (cmp) ->
+		@emit("beforerender", cmp)
 		return
 
 
-	afterRender: (component) ->
-		@emit("afterrender", component)
+	afterRender: (cmp) ->
+		@emit("afterrender", cmp)
 		return
 
 

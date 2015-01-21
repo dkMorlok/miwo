@@ -93,18 +93,30 @@ class Miwo
 		return @componentMgr.get(id)
 
 
-	# Select one component
+	# Find one component
 	# @param {String}
 	# @return {Miwo.component.Component}
-	select: (selector) ->
-		return @componentSelector.select(selector)
+	query: (selector) ->
+		for component in @componentMgr.roots
+			if component.isContainer
+				result = @componentSelector.query(selector, component)
+				if result then return result
+			else if component.is(selector)
+				return component
+		return null
 
 
-	# Select components
+	# Find more components
 	# @param {String}
 	# @return {[Miwo.component.Component]}
-	selectAll: (selector) ->
-		return @componentSelector.selectAll(selector)
+	queryAll: (selector) ->
+		results = []
+		for component in @componentMgr.roots
+			if component.isContainer
+				results.append(@componentSelector.queryAll(selector, component))
+			else if component.is(selector)
+				results.push(component)
+		return results
 
 
 	# Get service from injector
@@ -155,6 +167,7 @@ class Miwo
 
 
 	init: (onInit)->
+		if @injector then return @injector
 		configurator = @createConfigurator()
 		onInit(configurator) if onInit
 		injector = configurator.createInjector()

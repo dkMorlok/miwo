@@ -290,10 +290,6 @@ class Component extends MiwoObject
 			return  @scrollable
 
 
-	isXtype: (xtype) ->
-		return  @xtype is xtype
-
-
 	# Components model
 	setParent: (parent, name) ->
 		if parent is null and @container is null and name isnt null
@@ -313,22 +309,27 @@ class Component extends MiwoObject
 		if parent isnt null
 			@container = parent
 			@attachedContainer(@container)
+			@emit('attached', this, parent)
 		else
 			@detachedContainer(@container)
+			@emit('detached', this)
 			@container = null
 		return this
 
 
-	getParent: ->
-		return @container
-
-
-	up: (selector) ->
-		return miwo.componentSelector.selectParent(this, selector)
-
-
 	is: (selector) ->
 		return miwo.componentSelector.is(this, selector)
+
+
+	isXtype: (xtype) ->
+		return  @xtype is xtype
+
+
+	getParent: (selector) ->
+		if selector
+			return miwo.componentSelector.queryParent(this, selector)
+		else
+			return @container
 
 
 	nextSibling: ->

@@ -201,23 +201,24 @@ class Container extends Component
 		return (if index > 0 then @components.getAt(index - 1) else null)
 
 
-	select: (selector = "*") ->
-		return miwo.componentSelector.select(selector, this)
+	find: (selector = "*") ->
+		return miwo.componentSelector.query(selector, this)
 
 
-	selectAll: (selector = "*") ->
-		return miwo.componentSelector.selectAll(selector, this)
+	findAll: (selector = "*") ->
+		return miwo.componentSelector.queryAll(selector, this)
 
 
 	child: (selector = "*") ->
-		return @select("> " + selector)
+		matched = null
+		@components.each (component)=>
+			if !matched && component.is(selector)
+				matched = component
+			return
+		return matched
 
 
-	down: (selector) ->
-		return @select(selector)
-
-
-	get: (name, need) ->
+	get: (name, need = false) ->
 		return @getComponent(name, need)
 
 

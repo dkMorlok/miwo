@@ -1,3 +1,6 @@
+#
+# Function
+#
 Function::getter = (prop, getter) ->
 	Object.defineProperty @prototype, prop, {get:getter, configurable: yes}
 	return null
