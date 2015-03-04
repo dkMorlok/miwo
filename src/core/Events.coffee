@@ -106,7 +106,7 @@ class Events extends NativeEvents
 
 
 	munon: (old, obj, name, listener) ->
-		return  if old is obj
+		#return  if old is obj
 		@mun(old, name, listener)  if old
 		@mon(obj, name, listener)  if obj
 		return

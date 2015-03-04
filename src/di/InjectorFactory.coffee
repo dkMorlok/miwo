@@ -53,6 +53,8 @@ class InjectorFactory
 				definition.setup(service.setup)
 			if service.options
 				definition.option(service.options)
+			if service.global
+				definition.setGlobal(name)
 
 		for name,ext of @extensions
 			ext.update(injector)  if ext.update

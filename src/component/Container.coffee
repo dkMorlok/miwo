@@ -16,7 +16,7 @@ class Container extends Component
 
 
 
-	doInit: () ->
+	doInit: ->
 		super()
 		@components = new Collection()
 		return
@@ -58,6 +58,7 @@ class Container extends Component
 			component.setParent(this, name)
 		catch error
 			@components.remove(name)
+			console.log(error, error.stack)
 			throw error
 
 		@addedComponent(component)
@@ -320,10 +321,7 @@ class Container extends Component
 		# replace component's el with finded el
 		for el in topComponentEls
 			component = @get(el.getAttribute("miwo-component"), true)
-			el.removeAttribute('miwo-component')
-			component.setEl(el)
-			component.parentEl = @getContentEl()
-			component.render()
+			component.replace(el)
 		return
 
 

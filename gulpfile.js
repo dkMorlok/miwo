@@ -48,6 +48,14 @@ var pipes = {
 
 gulp.task('default', ['build']);
 
+gulp.task('build', function(cb) {
+	sequence(['compile-js', 'compile-css', 'copy-assets'], cb);
+});
+
+gulp.task('dist', function(cb) {
+	sequence('build', ['minify-js', 'minify-css'], cb);
+});
+
 gulp.task("watch", function() {
 	gulp.start('build');
 	gulp.watch(paths.watch.coffee, ['compile-js']);
@@ -85,12 +93,4 @@ gulp.task('minify-js', function() {
 		.pipe(uglify())
 		.pipe(rename({suffix:'.min'}))
 		.pipe(gulp.dest(paths.js.buildDir));
-});
-
-gulp.task('build', function(cb) {
-	sequence(['compile-js', 'compile-css', 'copy-assets'], cb);
-});
-
-gulp.task('dist', function(cb) {
-	sequence('build', ['minify-js', 'minify-css'], cb);
 });

@@ -37,6 +37,8 @@ class Translator
 		translated = @getByLang(key, @lang)
 		if translated is null
 			translated = @getByLang(key, @defaultLang)
+		if translated is null
+			translated = key
 		return translated
 
 

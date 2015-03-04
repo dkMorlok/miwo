@@ -1,4 +1,5 @@
 Configurator = require './Configurator'
+Translator = require '../locale/Translator'
 
 
 class Miwo
@@ -49,7 +50,7 @@ class Miwo
 	application: @service 'application'
 
 	# @property {Miwo.locale.Translator}
-	translator: @service 'translator'
+	translator: null
 
 	# @property {Miwo.di.Injector}
 	injector: null
@@ -61,6 +62,8 @@ class Miwo
 	constructor: ->
 		@ready () => @body = document.getElementsByTagName('body')[0];
 		@extensions = {}
+		@translator = new Translator()
+		return
 
 
 	# Register ready callback
@@ -78,7 +81,7 @@ class Miwo
 	# Require file by ajax and evaluate it
 	# @param {String} file
 	require: (file) ->
-		data = miwo.http.read(file+"?t="+(new Date().getTime()))
+		data = miwo.http.read(@baseUrl+file+"?t="+(new Date().getTime()))
 		try
 			eval(data)
 		catch e
@@ -91,6 +94,16 @@ class Miwo
 	# @return {Miwo.component.Component}
 	get: (id) ->
 		return @componentMgr.get(id)
+
+
+	# Make async callback call
+	# @param {Function} callback
+	# @return int
+	async: (callback) ->
+		return setTimeout ()=>
+			callback()
+			return
+		,1
 
 
 	# Find one component
@@ -160,7 +173,7 @@ class Miwo
 	# Set injector (called by Configurator)
 	# @param {Miwo.di.Injector}
 	setInjector: (@injector) ->
-		@baseUrl = injector.params.baseUrl
+		@injector.set('translator', @translator)
 		for name, service of injector.globals
 			Miwo.service(name, service) # create service getter
 		return

@@ -16,12 +16,12 @@ class MiwoObject extends Events
 
 	setConfig: (config) ->
 		return if !config
-		@[k] = v for k, v of config
+		@set(k,v) for k, v of config
 		return
 
 
 	set: (name, value) ->
-		@[name] = value
+		@[name] = value if value isnt undefined
 		return this
 
 

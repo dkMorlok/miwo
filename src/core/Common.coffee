@@ -17,3 +17,10 @@ Function::inject = (name, service) ->
 	@prototype.injects = {} if !@prototype.injects
 	@prototype.injects[name] = service || name
 	return null
+
+
+Number::pad = (length, char = '0') ->
+	str = '' + this
+	while str.length < length
+		str = char + str
+	return str

@@ -44,16 +44,9 @@ class MiwoExtension extends InjectorExtension
 		if !namespace.components then namespace.components = {}
 		if !namespace.controllers then namespace.controllers = {}
 
-
 		# setup di
 		for name,service of @config.di.services
 			injector.setGlobal(name,service)
-
-
-		# setup locale
-		injector.define 'translator', Translator, (service)=>
-			return
-
 
 		# setup http
 		injector.define 'http', RequestManager, (service)=>
@@ -65,7 +58,6 @@ class MiwoExtension extends InjectorExtension
 			if @config.cookie.document
 				service.document = @config.cookie.document
 			return
-
 
 		# setup components
 		injector.define 'componentMgr', ComponentManager

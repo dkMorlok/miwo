@@ -114,12 +114,17 @@ class Component extends MiwoObject
 	# @property {String}
 	role: null
 
+	# @property {Object}
+	plugins: null
+
 	_isGeneratedId: false
 	zIndexMgr: null
 	componentMgr: null
 
 
 	constructor: (config) ->
+		@plugins = {}
+
 		# custom initialize component (setup options)
 		@beforeInit()
 		if !@calledBeforeInit then throw new Error("In component #{@} you forgot call super::beforeInit()")
@@ -138,10 +143,11 @@ class Component extends MiwoObject
 		# initialize component after all options and properties setuped
 		@afterInit()
 		if !@calledAfterInit then throw new Error("In component #{@} you forgot call super::afterInit()")
+		@callPlugins('init', this)
 		return
 
 
-	beforeInit: () ->
+	beforeInit: ->
 		@calledBeforeInit = true
 		return
 
@@ -196,6 +202,11 @@ class Component extends MiwoObject
 			return new Element(tag, options)
 
 
+	#
+	# Common basic methods to access to elements
+	#
+
+
 	setId: (id) ->
 		@_isGeneratedId = false
 		@id = id
@@ -215,14 +226,21 @@ class Component extends MiwoObject
 		return @contentEl or @el
 
 
+	setContentEl: (el) ->
+		@contentEl = el
+		return
+
+
 	getFocusEl: ->
 		@focusEl
 
 
-	setEl: (el) ->
+	### not save method
+    setEl: (el) ->
 		@el = el
 		@contentEl.inject(el) if @contentEl
 		return
+	###
 
 
 	setParentEl: (el, position) ->
@@ -241,6 +259,11 @@ class Component extends MiwoObject
 
 	getElements: (selector) ->
 		return @el.getElements(selector)
+
+
+	#
+	# Z-index managing
+	#
 
 
 	setZIndex: (zIndex) ->
@@ -267,15 +290,36 @@ class Component extends MiwoObject
 		return @zIndexMgr
 
 
-	setDisabled: (disabled) ->
-		@disabled = disabled
-		@emit("disabled", this, disabled)
+	#
+	# Component state
+	#
+
+
+	setActive: (active, newActive) ->
+		@emit((if active then "activated" else "deactivated"), this)
 		return
 
 
-	setFocus: ->
+	setDisabled: (disabled) ->
+		@disabled = disabled
+		@emit("disabled", this, disabled)
+		@getFocusEl().set('tabindex', -disabled)
+		return
+
+
+	setFocus: (silent) ->
+		if @disabled then return
 		@focus = true
 		@getFocusEl().setFocus()
+		@emit('focus', this) if !silent
+		return
+
+
+	blur: (silent) ->
+		if @disabled then return
+		@focus = false
+		@getFocusEl().blur()
+		@emit('blur', this) if !silent
 		return
 
 
@@ -285,12 +329,18 @@ class Component extends MiwoObject
 
 	isScrollable: ->
 		if @scrollable is null
+			# by default scrollable
 			return @height or (@top isnt null and @bottom isnt null)
 		else
+			# by property
 			return  @scrollable
 
 
+	#
 	# Components model
+	#
+
+
 	setParent: (parent, name) ->
 		if parent is null and @container is null and name isnt null
 			@name = name # just rename
@@ -326,10 +376,7 @@ class Component extends MiwoObject
 
 
 	getParent: (selector) ->
-		if selector
-			return miwo.componentSelector.queryParent(this, selector)
-		else
-			return @container
+		return if selector then miwo.componentSelector.queryParent(this, selector) else @container
 
 
 	nextSibling: ->
@@ -340,16 +387,53 @@ class Component extends MiwoObject
 		return @getParent().previousSiblingOf(this)
 
 
+	# called when component is attached to parent
 	attachedContainer: (parent) ->
 		return
 
 
+	# called when component is detached from parent
 	detachedContainer: (parent) ->
 		return
 
 
+	#
+	# Plugins
+	#
 
+
+	installPlugin: (name, plugin) ->
+		if @plugins[name] then throw new Error("Plugin #{name} already installed in component #{this}")
+		@plugins[name] = plugin
+		return
+
+
+	uninstallPlugin: (name) ->
+		if !@plugins[name] then return
+		@plugins[name].destroy()
+		delete @plugins[name]
+		return
+
+
+	getPlugin: (name) ->
+		if !@plugins[name] then throw new Error("Plugin #{name} is not installed in component #{this}")
+		return @plugins[name]
+
+
+	hasPlugin: (name) ->
+		return @plugins[name] isnt undefined
+
+
+	callPlugins: (method, args...) ->
+		for name,plugin of @plugins
+			if plugin[method]
+				plugin[method].apply(plugin, args)
+		return
+
+
+	#
 	# Rendering
+	#
 
 
 	hasTemplate: ->
@@ -371,7 +455,7 @@ class Component extends MiwoObject
 		return template
 
 
-	update: () ->
+	update: ->
 		return
 
 
@@ -385,7 +469,7 @@ class Component extends MiwoObject
 
 
 	render: (el, position) ->
-		if !el && @renderTo then el = @renderTo
+		el = @renderTo if @renderTo
 		if @rendered then return
 
 		if position is 'replace'
@@ -397,6 +481,7 @@ class Component extends MiwoObject
 		# call before rendering started
 		@beforeRender()
 		if !@calledBeforeRender then throw new Error("In component #{@} you forgot call super::beforeRender()")
+		@callPlugins('beforeRender', this)
 
 		# find contentEl and try to change
 		contentEl = @getElement('[miwo-reference="contentEl"]')
@@ -408,6 +493,7 @@ class Component extends MiwoObject
 
 		# render component
 		@doRender()
+		@callPlugins('doRender', this)
 
 		# map references
 		@getElements("[miwo-reference]").each (el) =>
@@ -423,6 +509,7 @@ class Component extends MiwoObject
 		@calledAfterRender = false
 		@afterRender()
 		if !@calledAfterRender then throw new Error("In component #{@} you forgot call super::afterRender()")
+		@callPlugins('afterRender', this)
 
 		# notify rendered
 		@emit("rendered",  this, @getContentEl())
@@ -435,7 +522,7 @@ class Component extends MiwoObject
 		return
 
 
-	redraw: () ->
+	redraw: ->
 		@resetRendered()
 		@render()
 		return
@@ -508,7 +595,11 @@ class Component extends MiwoObject
 		return
 
 
-	# Manipulation
+	#
+	# Visibility
+	#
+
+
 	setVisible: (visible) ->
 		if visible then @show() else @hide()
 		return
@@ -516,26 +607,6 @@ class Component extends MiwoObject
 
 	isVisible: ->
 		return @visible
-
-
-	setSize: (width, height) ->
-		if Type.isObject(width)
-			height = width.height
-			width = width.width
-		if height isnt undefined and height isnt null
-			@height = height
-			@el.setStyle("height", height)
-		if width isnt undefined and width isnt null
-			@width = width
-			@el.setStyle("width", width)
-		@emit("resize", this)
-		return
-
-
-	getSize: ->
-		return
-		width: @el.getWidth()
-		height: @el.getHeight()
 
 
 	setPosition: (pos) ->
@@ -605,12 +676,29 @@ class Component extends MiwoObject
 		return
 
 
-	setActive: (active, newActive) ->
-		if active
-			@emit("activated", this)
-		else
-			@emit("deactivated", this)
+	setSize: (width, height) ->
+		if Type.isObject(width)
+			height = width.height
+			width = width.width
+		if height isnt undefined and height isnt null
+			@height = height
+			@el.setStyle("height", height)
+		if width isnt undefined and width isnt null
+			@width = width
+			@el.setStyle("width", width)
+		@emit("resize", this)
 		return
+
+
+	getSize: ->
+		return
+		width: @el.getWidth()
+		height: @el.getHeight()
+
+
+	#
+	# Destroying
+	#
 
 
 	beforeDestroy: ->
@@ -625,6 +713,7 @@ class Component extends MiwoObject
 		@template.destroy() if @template?.destroy?
 		@el.eliminate("component")
 		@el.destroy()
+		for name,plugin of @plugins then @uninstallPlugin(name)
 		return
 
 

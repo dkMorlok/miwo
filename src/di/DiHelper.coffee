@@ -78,9 +78,9 @@ class DiHelper
 				if !instance[op]
 					throw new Error("Cant call method #{op} in service #{name} of #{instance.constructor.name}. Method is not defined")
 				if !opCall
-					result.push(instance[op])
+					result.push ()=> instance[op].call(instance)
 				else if !args
-					result.push(instance[op]())
+					result.push(instance[op].call(instance))
 				else
 					result.push(instance[op].apply(instance, @evaluateArgs(opArgs, injector)))
 

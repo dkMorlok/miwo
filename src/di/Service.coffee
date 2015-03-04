@@ -33,7 +33,7 @@ class Service
 		return this
 
 
-	setGlobal: (name) ->
+	setGlobal: (name = null) ->
 		@injector.setGlobal(name||@name, @name)
 		return this
 
