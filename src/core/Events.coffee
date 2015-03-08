@@ -101,7 +101,10 @@ class Events extends NativeEvents
 
 
 	mun: (object, name, listener) ->
-		@removeManagedListeners(object, name, listener)
+		if Type.isObject(name)
+			@removeManagedListeners(object, n, l)  for n,l of name
+		else
+			@removeManagedListeners(object, name, listener)
 		return
 
 

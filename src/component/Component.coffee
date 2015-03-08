@@ -16,10 +16,10 @@ class Component extends MiwoObject
 	name: null
 
 	# @config {String|Number}
-	width: null
+	width: undefined
 
 	# @config {String|Number}
-	height: null
+	height: undefined
 
 	# @config {String|Number}
 	top: null
@@ -174,7 +174,7 @@ class Component extends MiwoObject
 			@contentEl.inject(@el)
 			@contentEl.addClass("miwo-ct")
 
-		# set default foucs element
+		# set default focus element
 		@focusEl = @el
 		return
 

@@ -113,8 +113,8 @@ class Laoyut extends MiwoObject
 			component.getLayout().setOwnerLayout(this)
 
 		component.el.addClass(@itemCls) if @itemCls
-		component.el.setStyle('width', component.width) if component.width
-		component.el.setStyle('height', component.height) if component.height
+		component.el.setStyle('width', component.width) if component.width || component.width is null
+		component.el.setStyle('height', component.height) if component.height || component.height is null
 		return
 
 

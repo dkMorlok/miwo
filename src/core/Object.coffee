@@ -28,12 +28,12 @@ class MiwoObject extends Events
 	destroy: ->
 		if @isDestroyed then return
 		@destroying = true
-		if @beforeDestroy then @beforeDestroy()
+		@beforeDestroy()
 		@_callDestroy()
-		if @doDestroy then @doDestroy()
+		@doDestroy()
 		@destroying = false
 		@isDestroyed = true
-		if @afterDestroy then @afterDestroy()
+		@afterDestroy()
 		return
 
 
@@ -46,6 +46,21 @@ class MiwoObject extends Events
 
 	toString: ->
 		return @constructor.name
+
+
+	beforeDestroy: ->
+		@beforeDestroyCalled = true
+		return
+
+
+	doDestroy: ->
+		@doDestroyCalled = true
+		return
+
+
+	afterDestroy: ->
+		@afterDestroyCalled = true
+		return
 
 
 

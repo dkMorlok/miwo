@@ -261,7 +261,7 @@ class Container extends Component
 		return
 
 
-	hasLayout: () ->
+	hasLayout: ->
 		return @layout isnt null && @layout isnt false
 
 
@@ -289,7 +289,7 @@ class Container extends Component
 
 
 	doRender: ->
-		super()
+		super
 		# custom container rendering
 		@renderContainer()
 
@@ -303,7 +303,7 @@ class Container extends Component
 		return
 
 
-	renderContainer: () ->
+	renderContainer: ->
 		# find nested child components
 		topComponentEls = []
 		for el in @getElements("[miwo-component]")
@@ -339,7 +339,7 @@ class Container extends Component
 		return
 
 
-	removeAllComponents: () ->
+	removeAllComponents: ->
 		@components.each (component, name) =>
 			@removeComponent(name)
 			component.destroy()

@@ -89,6 +89,14 @@ class Miwo
 		return
 
 
+	# Redirect application to new request
+	# @param {String} code
+	# @param {Object} params
+	redirect: (code, params) ->
+		@application.redirect(code, params)
+		return
+
+
 	# Get component by id
 	# @param {String}
 	# @return {Miwo.component.Component}
