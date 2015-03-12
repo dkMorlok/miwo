@@ -37,6 +37,7 @@ class Overlay extends MiwoObject
 
 
 	open: ->
+		@opened = true
 		@emit("open")
 		@target.addClass("miwo-overlayed")
 		@overlay.setStyle("display", "block")
@@ -46,18 +47,18 @@ class Overlay extends MiwoObject
 
 
 	close: ->
+		@opened = false
 		@emit("close")
 		@target.removeClass("miwo-overlayed")
 		@overlay.setStyle("opacity", 0.0)
-		(()=>@overlay.setStyle("display", "none")).delay(300)
+		(()=>@overlay.setStyle("display", "none") if !@opened ).delay(300)
 		@emit("hide")
 		return
 
 
 	doDestroy: ->
 		@overlay.destroy()
-		super()
-		return
+		super
 
 
 module.exports = Overlay

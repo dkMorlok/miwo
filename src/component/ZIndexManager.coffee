@@ -6,15 +6,18 @@ class ZIndexManager extends MiwoObject
 
 	zIndexBase: 10000
 	zIndex: 0
-	list: {}
-	stack: []
+	list: null
+	stack: null
 	front: null
 	overlay: null
 
 
 	constructor: ->
-		super()
+		super
+		@list = {}
+		@stack = []
 		@zIndex = @zIndexBase
+		return
 
 
 	# Registers a floating {@link Miwo.component.Component} with this ZIndexManager. This should not

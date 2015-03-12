@@ -15,13 +15,18 @@ class MiwoObject extends Events
 
 
 	setConfig: (config) ->
-		return if !config
-		@set(k,v) for k, v of config
+		if !config then return
+		for k, v of config then @setProperty(k,v)
 		return
 
 
-	set: (name, value) ->
+	setProperty: (name, value) ->
 		@[name] = value if value isnt undefined
+		return this
+
+
+	set: (name, value) ->
+		@setProperty(name, value)
 		return this
 
 

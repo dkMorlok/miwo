@@ -39,6 +39,10 @@ class ComponentManager extends MiwoObject
 		cmp.on 'detached', (cmp) =>
 			@roots.include(cmp) if !cmp.destroying
 			return
+		cmp.on 'idchange', (cmp, newId, oldId) =>
+			delete @list[oldId]
+			@list[newId] = cmp
+			return
 		@emit("register", cmp)
 		return
 

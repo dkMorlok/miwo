@@ -209,8 +209,11 @@ class Component extends MiwoObject
 
 	setId: (id) ->
 		@_isGeneratedId = false
-		@id = id
-		@el.set("id", id)
+		oldId = @id
+		if @id isnt id
+			@id = id
+			@el.set("id", id)
+			@emit('idchange', this, id, oldId)
 		return
 
 
@@ -487,6 +490,23 @@ class Component extends MiwoObject
 		contentEl = @getElement('[miwo-reference="contentEl"]')
 		@contentEl = contentEl  if contentEl
 
+		@drawComponent()
+		return
+
+
+	replace: (target) ->
+		target = target || $(@id)
+		@render(target, 'replace') if target
+		return
+
+
+	redraw: ->
+		if @contentEl then @contentEl.empty() else @el.empty()
+		@drawComponent()
+		return
+
+
+	drawComponent: ->
 		# mark component as "in rendering procecss"
 		@rendering = true
 		@emit("render", this, @el)
@@ -513,18 +533,6 @@ class Component extends MiwoObject
 
 		# notify rendered
 		@emit("rendered",  this, @getContentEl())
-		return
-
-
-	replace: (target) ->
-		target = target || $(@id)
-		@render(target, 'replace') if target
-		return
-
-
-	redraw: ->
-		@resetRendered()
-		@render()
 		return
 
 
