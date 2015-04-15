@@ -92,8 +92,17 @@ class Container extends Component
 		return
 
 
+	removeComponents: ->
+		@components.each (component, name) =>
+			@removeComponent(name)
+			component.destroy()
+			return
+		return
+
+
 	removedComponent: (component) ->
 		return
+
 
 	# propagate to parent
 	removedComponentDeep: (component) ->
@@ -148,8 +157,8 @@ class Container extends Component
 		return @components.length > 0
 
 
-	getComponents: ->
-		return @components
+	getComponents: (asArray) ->
+		return if asArray then @components.toArray() else @components
 
 
 	findComponents: (deep = false, filters = {}, components = []) ->
@@ -255,7 +264,7 @@ class Container extends Component
 	# Rendering
 
 
-	update: () ->
+	update: ->
 		if @layout && @layout instanceof layout.Layout
 			@layout.update()
 		return
@@ -339,16 +348,8 @@ class Container extends Component
 		return
 
 
-	removeAllComponents: ->
-		@components.each (component, name) =>
-			@removeComponent(name)
-			component.destroy()
-			return
-		return
-
-
 	doDestroy: ->
-		@removeAllComponents()
+		@removeComponents()
 		@setLayout(null) if @hasLayout()
 		super()
 

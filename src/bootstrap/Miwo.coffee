@@ -40,6 +40,9 @@ class Miwo
 	# @property {Miwo.component.ComponentManager}
 	componentMgr: @service 'componentMgr'
 
+	# @property {Miwo.component.StateManager}
+	componentStateMgr: @service 'componentStateMgr'
+
 	# @property {Miwo.component.ComponentSelector}
 	componentSelector: @service 'componentSelector'
 

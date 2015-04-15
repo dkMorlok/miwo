@@ -8,6 +8,8 @@ CookieManager = require './http/CookieManager'
 ComponentManager = require './component/ComponentManager'
 ComponentSelector = require './component/ComponentSelector'
 ZIndexManager = require './component/ZIndexManager'
+StateManager = require './component/StateManager'
+StatePersister = require './component/StatePersister'
 
 # locale
 Translator = require './locale/Translator'
@@ -61,6 +63,8 @@ class MiwoExtension extends InjectorExtension
 
 		# setup components
 		injector.define 'componentMgr', ComponentManager
+		injector.define 'componentStateMgr', StateManager
+		injector.define 'componentStatePersister', StatePersister
 		injector.define 'componentSelector', ComponentSelector
 		injector.define 'zIndexMgr', ZIndexManager
 		return

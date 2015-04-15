@@ -1,12 +1,15 @@
 Layout = require('./Layout')
 
+
 class AbsoluteLayout extends Layout
+
 
 	constructor: (config) ->
 		super(config)
 		@type = 'absolute'
 		@targetCls = 'miwo-layout-absolute'
 		@itemCls = 'miwo-layout-item'
+		return
 
 
 	configureComponent: (component) ->

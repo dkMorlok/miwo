@@ -117,6 +117,12 @@ class Component extends MiwoObject
 	# @property {Object}
 	plugins: null
 
+	# @property {Boolean}
+	stateManage: false
+
+	# @property {String}
+	stateName: null
+
 	_isGeneratedId: false
 	zIndexMgr: null
 	componentMgr: null
@@ -175,7 +181,14 @@ class Component extends MiwoObject
 			@contentEl.addClass("miwo-ct")
 
 		# set default focus element
-		@focusEl = @el
+		if @focusEl is true
+			@focusEl = @el
+
+		if @stateManage
+			stateName = @stateName || @id
+			if !stateName
+				throw new Error("Component id or stateName must be defined if you want use component states")
+			@state = miwo.componentStateMgr.loadState(stateName)
 		return
 
 
@@ -306,14 +319,14 @@ class Component extends MiwoObject
 	setDisabled: (disabled) ->
 		@disabled = disabled
 		@emit("disabled", this, disabled)
-		@getFocusEl().set('tabindex', -disabled)
+		@getFocusEl().set('tabindex', -disabled) if @isFocusable()
 		return
 
 
 	setFocus: (silent) ->
 		if @disabled then return
 		@focus = true
-		@getFocusEl().setFocus()
+		@getFocusEl().setFocus() if @isFocusable()
 		@emit('focus', this) if !silent
 		return
 
@@ -321,7 +334,7 @@ class Component extends MiwoObject
 	blur: (silent) ->
 		if @disabled then return
 		@focus = false
-		@getFocusEl().blur()
+		@getFocusEl().blur() if @isFocusable()
 		@emit('blur', this) if !silent
 		return
 
@@ -459,7 +472,7 @@ class Component extends MiwoObject
 
 
 	update: ->
-		return
+		return this
 
 
 	resetRendered: (dispose) ->
@@ -468,7 +481,7 @@ class Component extends MiwoObject
 		if dispose
 			@el.empty()
 			@el.dispose()
-		return
+		return this
 
 
 	render: (el, position) ->
@@ -491,19 +504,20 @@ class Component extends MiwoObject
 		@contentEl = contentEl  if contentEl
 
 		@drawComponent()
-		return
+		return this
 
 
 	replace: (target) ->
 		target = target || $(@id)
 		@render(target, 'replace') if target
-		return
+		return this
 
 
 	redraw: ->
+		if !@rendered then return
 		if @contentEl then @contentEl.empty() else @el.empty()
 		@drawComponent()
-		return
+		return this
 
 
 	drawComponent: ->
@@ -530,6 +544,8 @@ class Component extends MiwoObject
 		@afterRender()
 		if !@calledAfterRender then throw new Error("In component #{@} you forgot call super::afterRender()")
 		@callPlugins('afterRender', this)
+
+		@wasRendered = true
 
 		# notify rendered
 		@emit("rendered",  this, @getContentEl())
@@ -630,9 +646,9 @@ class Component extends MiwoObject
 
 
 	show: ->
+		if !@rendered then @render()
 		if @visible then return
 		@emit("show", this)
-		@render()
 		@doShow()
 		@parentShown(this)
 		@emit("shown", this)

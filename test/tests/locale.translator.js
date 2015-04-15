@@ -35,11 +35,11 @@ describe("Locale.Translator", function() {
 		});
 
 		it("should get null for missing translate", function () {
-			expect(translator.get('app.unknown')).to.equal('app.unknown');
+			expect(translator.get('app.unknown')).to.equal('');
 		});
 
 		it("should get null for unknown translate section", function () {
-			expect(translator.get('unknown.title')).to.equal('unknown.title');
+			expect(translator.get('unknown.title')).to.equal('');
 		});
 
 		it("should get translate by path", function () {
