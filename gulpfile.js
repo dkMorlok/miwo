@@ -3,21 +3,18 @@ var gutil = require('gulp-util');
 var rename = require('gulp-rename');
 var uglify = require('gulp-uglify');
 var browserify = require('gulp-browserify');
-var optimizeBrowserify = require('gulp-optimizebrowserify');
+var optimizeBrowserify = require('gulp-optimize-browserify');
 var less = require('gulp-less');
 var minifycss = require('gulp-minify-css');
-var sequence = require('run-sequence');
 
 
 var paths = {
 	css: {
 		src: 'less/miwo.less',
-		target: 'miwo.css',
 		buildDir: './dist/css/'
 	},
 	js: {
 		src: 'src/index.coffee',
-		target: 'miwo.js',
 		buildDir: './dist/js/'
 	},
 	assets: {
@@ -46,18 +43,13 @@ var pipes = {
 
 
 
-gulp.task('default', ['build']);
+gulp.task('default', ['build', 'watch']);
 
-gulp.task('build', function(cb) {
-	sequence(['compile-js', 'compile-css', 'copy-assets'], cb);
-});
+gulp.task('build', ['compile-js', 'compile-css', 'copy-assets']);
 
-gulp.task('dist', function(cb) {
-	sequence('build', ['minify-js', 'minify-css'], cb);
-});
+gulp.task('dist', ['minify-js', 'minify-css', 'copy-assets']);
 
 gulp.task("watch", function() {
-	gulp.start('build');
 	gulp.watch(paths.watch.coffee, ['compile-js']);
 	gulp.watch(paths.watch.less, ['compile-css']);
 });
@@ -65,13 +57,14 @@ gulp.task("watch", function() {
 gulp.task('compile-css', function() {
 	return gulp.src(paths.css.src)
 		.pipe(pipes.createLess())
+		.pipe(rename('miwo.css'))
 		.pipe(gulp.dest(paths.css.buildDir));
 });
 
 gulp.task('compile-js', function() {
 	return gulp.src(paths.js.src, { read: false })
-		.pipe(pipes.createBrowserify({transform: ['caching-coffeeify'], extensions: ['.coffee']}))
-		.pipe(rename(paths.js.target))
+		.pipe(pipes.createBrowserify({transform: ['caching-coffeeify'], extensions: ['.coffee'], debug:true}))
+		.pipe(rename('miwo.js'))
 		.pipe(gulp.dest(paths.js.buildDir));
 });
 
@@ -81,16 +74,18 @@ gulp.task('copy-assets', function() {
 });
 
 gulp.task('minify-css', function() {
-	return gulp.src(paths.css.buildDir+paths.css.target)
+	return gulp.src(paths.css.src)
+		.pipe(pipes.createLess())
 		.pipe(minifycss({keepBreaks:true}))
-		.pipe(rename({suffix:'.min'}))
+		.pipe(rename('miwo.min.css'))
 		.pipe(gulp.dest(paths.css.buildDir));
 });
 
 gulp.task('minify-js', function() {
-	return gulp.src(paths.js.buildDir+paths.js.target)
+	return gulp.src(paths.js.src, { read: false })
+		.pipe(pipes.createBrowserify({transform: ['caching-coffeeify'], extensions: ['.coffee']}))
 		.pipe(optimizeBrowserify())
 		.pipe(uglify())
-		.pipe(rename({suffix:'.min'}))
+		.pipe(rename('miwo.min.js'))
 		.pipe(gulp.dest(paths.js.buildDir));
 });
