@@ -35,16 +35,15 @@ class CookieSection
 
 
 	get: (name, def) ->
-		return (if @items[name] isnt undefined then @items[name] else def)
+		return (if @items.hasOwnProperty(name) then @items[name] else def)
 
 
 	has: (name) ->
-		return @items[name] isnt undefined
+		return @items.hasOwnProperty(name)
 
 
 	each: (callback) ->
-		Object.each(@items, callback)
-		return
+		return Object.each(@items, callback)
 
 
 module.exports = CookieSection

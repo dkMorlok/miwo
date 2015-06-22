@@ -4,38 +4,31 @@ class HttpRequest extends Request
 
 
 	constructor: (options = {}) ->
+		options.type = options.type || 'json'
 		super(Object.merge(options, {data: {}}))
-		@initRequest()
+		@init()
+		return
 
 
-	initRequest: ->
-		@setHeader "Accept", "application/json"
-		@setHeader "X-Request", "JSON"
+	init: ->
+		if @options.type is 'json'
+			@setHeader('Accept', 'application/json')
+			@setHeader('X-Request', 'JSON')
 		return
 
 
 	success: (text) ->
-		json = @processJson(text)
-		if !json
-			@onFailure(null, text)
-		else
+		if @options.type is 'json'
+			try
+				json = JSON.decode(text, @options.secure)
+				@response.json = json
+			catch err
+				@emit("error", err, text, this.xhr)
+				@onFailure()
+				return
 			@onSuccess(json, text)
-		return
-
-
-	failure: ->
-		json = @processJson(@response.text)
-		@onFailure(json, @response.text)
-		return
-
-
-	processJson: (text) ->
-		try
-			json = JSON.decode(text, @options.secure)
-			@response.json = json
-			return json
-		catch error
-			@emit("error", text, error)
+		else
+			@onSuccess(text)
 		return
 
 

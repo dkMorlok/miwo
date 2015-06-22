@@ -1,25 +1,26 @@
 class RedirectPlugin
 
-	setManager:(manager) ->
-		manager.on 'success', (request, response) ->
-			if response.redirect
-				document.location = response.redirect
+	success: (request, payload) ->
+		if request.type isnt 'json'
+			return
+		if payload.redirect
+			document.location = payload.redirect
 		return
+
 
 
 class FailurePlugin
 
-	setManager:(manager) ->
-		manager.on 'failure', (request) ->
-			miwo.flash.error(request.xhr.statusText + ": " + request.xhr.responseText.replace(/(<([^>]+)>)/g, ""))
+	failure: (request) ->
+		miwo.flash.error(request.xhr.statusText + ": " + request.xhr.responseText.replace(/(<([^>]+)>)/g, ""))
 		return
+
 
 
 class ErrorPlugin
 
-	setManager:(manager) ->
-		manager.on 'error', (request, text, error) ->
-			console.error("Error in ajax request", request)
+	error: (request, err) ->
+		console.log("Error in ajax request", request, err)
 		return
 
 

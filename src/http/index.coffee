@@ -1,4 +1,7 @@
 module.exports =
 
 	HttpRequest: require './HttpRequest'
-	RequestManager: require './RequestManager'
+	HttpRequestManager: require './HttpRequestManager'
+	CookieSection: require './CookieSection'
+	CookieManager: require './CookieManager'
+	plugins: require './plugins'

@@ -6,9 +6,10 @@ class CookieManager
 	document: null
 	options: null
 
+
 	constructor: (options = {}) ->
-		@document = document
 		@options = options
+		@document = document
 		return
 
 

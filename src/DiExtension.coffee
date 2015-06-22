@@ -1,43 +1,31 @@
-InjectorExtension = require './di/InjectorExtension'
-
-# http module
-RequestManager = require './http/RequestManager'
-CookieManager = require './http/CookieManager'
-
-# component module
-ComponentManager = require './component/ComponentManager'
-ComponentSelector = require './component/ComponentSelector'
-ZIndexManager = require './component/ZIndexManager'
-StateManager = require './component/StateManager'
-StatePersister = require './component/StatePersister'
-
-# locale
-Translator = require './locale/Translator'
+di = require './di'
+http = require './http'
+component = require './component'
+utils = require './utils'
 
 
-class MiwoExtension extends InjectorExtension
+class MiwoExtension extends di.InjectorExtension
 
 
 	init: ->
 		@setConfig
-			http: {
+			http:
 				params: {}
-				plugins: {
-					redirect: require('./http/plugins').RedirectPlugin
-					failure: require('./http/plugins').FailurePlugin
-					error: require('./http/plugins').ErrorPlugin
-				}
-			}
-			cookie: {
+				plugins:
+					redirect: http.plugins.RedirectPlugin
+					failure: http.plugins.FailurePlugin
+					error: http.plugins.ErrorPlugin
+			cookie:
 				document: null
-			}
-			di: {
+			di:
 				services: {}
-			}
+			flash:
+				renderer: null
 		return
 
 
 	build: (injector) ->
+		config = @config
 		namespace = window[injector.params.namespace]
 		if !namespace
 			namespace = {}
@@ -46,27 +34,42 @@ class MiwoExtension extends InjectorExtension
 		if !namespace.components then namespace.components = {}
 		if !namespace.controllers then namespace.controllers = {}
 
+
 		# setup di
-		for name,service of @config.di.services
+		for name,service of config.di.services
 			injector.setGlobal(name,service)
 
+
 		# setup http
-		injector.define 'http', RequestManager, (service)=>
-			service.params = @config.http.params
-			for name,plugin of @config.http.plugins
-				service.register(name, new plugin())
-			return
-		injector.define 'cookie', CookieManager, (service)=>
-			if @config.cookie.document
-				service.document = @config.cookie.document
+		injector.define 'http', http.HttpRequestManager, (service) ->
+			service.params = config.http.params
+			for name,plugin of config.http.plugins
+				service.plugin(new plugin()) if plugin
 			return
 
+		injector.define 'cookie', http.CookieManager, (service) ->
+			if config.cookie.document
+				service.document = config.cookie.document
+			return
+
+
 		# setup components
-		injector.define 'componentMgr', ComponentManager
-		injector.define 'componentStateMgr', StateManager
-		injector.define 'componentStatePersister', StatePersister
-		injector.define 'componentSelector', ComponentSelector
-		injector.define 'zIndexMgr', ZIndexManager
+		injector.define 'componentMgr', component.ComponentManager
+
+		injector.define 'componentStateMgr', component.StateManager
+
+		injector.define 'componentStatePersister', component.StatePersister
+
+		injector.define 'componentSelector', component.ComponentSelector
+
+		injector.define 'zIndexMgr', component.ZIndexManager
+
+
+		# setup utils
+		injector.define 'flash', utils.FlashNotificator, (service) ->
+			if config.flash.renderer
+				service.renderer = config.flash.renderer
+			return
 		return
 
 

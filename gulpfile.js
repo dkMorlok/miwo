@@ -47,7 +47,7 @@ gulp.task('default', ['build', 'watch']);
 
 gulp.task('build', ['compile-js', 'compile-css', 'copy-assets']);
 
-gulp.task('dist', ['minify-js', 'minify-css', 'copy-assets']);
+gulp.task('dist', ['compile-js', 'compile-css', 'minify-js', 'minify-css', 'copy-assets']);
 
 gulp.task("watch", function() {
 	gulp.watch(paths.watch.coffee, ['compile-js']);
